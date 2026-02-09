@@ -255,7 +255,7 @@ const MovieCard = ({ movie }) => {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      className="relative flex-none w-35md:w-45aspect-2/3 cursor-pointer group"
+      className="relative flex-none w-35 md:w-45aspect-2/3 cursor-pointer group"
       onClick={() => navigate(`/watch/${movie.id}`)}
     >
       <div className="w-full h-full rounded-xl overflow-hidden relative shadow-lg bg-[#202020] ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300">
@@ -354,7 +354,7 @@ const HomeSkeleton = () => (
           <div className="h-6 w-48 bg-gray-800 rounded" />
           <div className="flex gap-4 overflow-hidden">
             {[1, 2, 3, 4, 5, 6].map((j) => (
-              <div key={j} className="h-50 w-3.5 bg-gray-800 rounded-md flex-none" />
+              <div key={j} className="h-50 w-37.5 bg-gray-800 rounded-md flex-none" />
             ))}
           </div>
         </div>
