@@ -7,7 +7,7 @@ import { motion } from "framer-motion";
 // --- Sub-Component: Compact Search Card ---
 const SearchCard = ({ movie }) => {
   return (
-    <Link to={`/watch/${movie.id}`} className="group relative block w-full aspect-[2/3] bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300">
+    <Link to={`/watch/${movie.id}`} className="group relative block w-full aspect-2/3 bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300">
       {movie.poster_path ? (
         <img
           src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
@@ -23,7 +23,7 @@ const SearchCard = ({ movie }) => {
       )}
 
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
         <h3 className="text-white text-sm font-title font-semibold truncate mb-1">{movie.title}</h3>
         <div className="font-subtitle flex items-center justify-between text-[10px] text-gray-300">
           <span className="flex items-center gap-1 text-purple-500">

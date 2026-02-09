@@ -48,7 +48,7 @@ const Navbar = () => {
         
         {/* --- Logo (Left) --- */}
         <div 
-          className="text-2xl font-logo text-purple-400 tracking-wider cursor-pointer z-50 flex-shrink-0"
+          className="text-2xl font-logo text-purple-400 tracking-wider cursor-pointer z-50 shrink-0"
           onClick={() => navigate("/")}
         >
           LUNA<span className="text-white font-light">FLIX</span>
@@ -156,7 +156,7 @@ const Hero = ({ movie }) => {
   if (!movie) return <div className="h-[60vh] w-full bg-[#1a1a1a] animate-pulse rounded-2xl mx-4 mt-24" />;
 
   return (
-    <div className="pt-24 pb-6 px-4 md:px-8 max-w-[1800px] mx-auto">
+    <div className="pt-24 pb-6 px-4 md:px-8 max-w-450 mx-auto">
       <div className="relative h-[55vh] md:h-[65vh] w-full rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.6)] group border border-white/5 bg-[#141414]">
         
         {/* Background Image with Slow Zoom */}
@@ -174,8 +174,8 @@ const Hero = ({ movie }) => {
         </motion.div>
         
         {/* Cinematic Gradient Overlays */}
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-r from-black/95 via-black/50 to-transparent" />
+        <div className="absolute inset-0 bg-linear-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
         {/* Content Container */}
         <div className="absolute bottom-0 top-0 left-0 flex flex-col justify-center px-8 md:px-16 max-w-2xl space-y-5">
@@ -255,7 +255,7 @@ const MovieCard = ({ movie }) => {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      className="relative flex-none w-[140px] md:w-[180px] aspect-[2/3] cursor-pointer group"
+      className="relative flex-none w-35md:w-45aspect-2/3 cursor-pointer group"
       onClick={() => navigate(`/watch/${movie.id}`)}
     >
       <div className="w-full h-full rounded-xl overflow-hidden relative shadow-lg bg-[#202020] ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300">
@@ -267,10 +267,10 @@ const MovieCard = ({ movie }) => {
         />
 
         {/* Compact Gradient Overlay */}
-        <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+        <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
           
           {/* Action Icon */}
-          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 shadow-lg">
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 shadow-lg">
              <Play size={20} fill="white" className="text-white" />
           </div>
 
@@ -354,7 +354,7 @@ const HomeSkeleton = () => (
           <div className="h-6 w-48 bg-gray-800 rounded" />
           <div className="flex gap-4 overflow-hidden">
             {[1, 2, 3, 4, 5, 6].map((j) => (
-              <div key={j} className="h-[200px] w-[150px] bg-gray-800 rounded-md flex-none" />
+              <div key={j} className="h-50 w-3.5 bg-gray-800 rounded-md flex-none" />
             ))}
           </div>
         </div>
