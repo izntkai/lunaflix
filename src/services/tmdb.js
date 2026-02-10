@@ -57,3 +57,28 @@ export function getBackdropUrl(path, size = "w780") {
   return path ? `${IMAGE_BASE}/${size}${path}` : "https://via.placeholder.com/1280x720?text=No+Backdrop";
 }
 
+export const getPersonDetails = async (id) => {
+  const res = await fetch(
+    `https://api.themoviedb.org/3/person/${id}?api_key=${API_KEY}&append_to_response=combined_credits`
+  );
+  return res.json();
+};
+
+// --- ADDED TV FUNCTIONS ---
+export async function getTrendingAll() {
+  const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}`);
+  return res.json();
+}
+
+export async function getPopularTV() {
+  const res = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}&language=en-US&page=1`);
+  return res.json();
+}
+
+export async function getTvInfo(id) {
+  const res = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits`);
+  return res.json();
+}
+
+
+
