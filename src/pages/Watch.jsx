@@ -1,6 +1,7 @@
 import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getMovieInfo } from "../services/tmdb";
+import Navbar from "../components/Navbar";
 import { 
   ArrowLeft, Server, Calendar, Star, Clock, 
   ShieldCheck, Loader2, Cast, ThumbsUp, Share2 
@@ -28,6 +29,9 @@ export default function Watch() {
   const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [iframeLoading, setIframeLoading] = useState(true);
+  
+  // Safety state: Blocks interactions for a short moment
+  const [interactionReady, setInteractionReady] = useState(false);
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -35,6 +39,13 @@ export default function Watch() {
       setMovie(data);
       setLoading(false);
     });
+
+    // 1. SAFETY LOCK: Block ALL clicks for 500ms to prevent ghost clicks
+    const timer = setTimeout(() => {
+      setInteractionReady(true);
+    }, 500);
+
+    return () => clearTimeout(timer);
   }, [id]);
 
   useEffect(() => {
@@ -50,9 +61,17 @@ export default function Watch() {
   }
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-gray-100 font-sans selection:bg-purple-500 selection:text-white pb-12">
+    <div className="min-h-screen bg-[#0f0f0f] text-gray-100 font-sans selection:bg-purple-500 selection:text-white pb-12 relative">
       
-      {/* --- Ambient Background (Darker & subtler) --- */}
+      {/* --- GHOST CLICK SHIELD --- */}
+      {/* This invisible layer sits on top of everything for 0.5s to catch stray taps */}
+      {!interactionReady && (
+        <div className="fixed inset-0 z-9999 bg-transparent" />
+      )}
+
+      <Navbar />
+      
+      {/* --- Ambient Background --- */}
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[#0f0f0f]/95 z-10" />
         <img
@@ -62,14 +81,18 @@ export default function Watch() {
         />
       </div>
 
-      {/* --- Main Container (Reduced to max-w-5xl for smaller view) --- */}
-      <div className="relative z-10 max-w-5xl mx-auto px-4 py-4">
+      {/* --- Main Container --- */}
+      <div className="relative z-10 max-w-5xl mx-auto pt-24 px-4 py-4">
         
         {/* --- Navigation --- */}
         <div className="flex items-center justify-between mb-4">
           <button
-            onClick={() => navigate(-1)}
-            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition group text-sm"
+            onClick={() => {
+              if (interactionReady) navigate(-1);
+            }}
+            // Only show full opacity when ready to prevent confusion
+            style={{ opacity: interactionReady ? 1 : 0.5 }}
+            className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition group text-sm cursor-pointer"
           >
             <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
             <span className="font-medium">Back</span>
@@ -100,7 +123,7 @@ export default function Watch() {
           />
         </motion.div>
 
-        {/* --- Compact Content Grid --- */}
+        {/* --- Content Grid --- */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           
           {/* LEFT COLUMN: Movie Info */}
@@ -133,7 +156,7 @@ export default function Watch() {
               </div>
             </div>
 
-            {/* Compact Action Bar */}
+            {/* Action Bar */}
             <div className="flex items-center gap-2 py-3 border-y border-white/5">
               <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-full transition text-xs font-medium">
                 <ThumbsUp size={14} /> Like
@@ -154,7 +177,7 @@ export default function Watch() {
               </p>
             </div>
 
-            {/* Cast Sneak Peek */}
+            {/* Cast */}
             {movie?.credits?.cast?.length > 0 && (
               <div>
                 <h3 className="text-lg font-title font-semibold text-white mb-2 flex items-center gap-1.5">
@@ -182,7 +205,7 @@ export default function Watch() {
             )}
           </motion.div>
 
-          {/* RIGHT COLUMN: Compact Server List */}
+          {/* RIGHT COLUMN: Server List */}
           <motion.div 
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -205,7 +228,7 @@ export default function Watch() {
                   <button
                     key={server.name}
                     onClick={() => setCurrentServer(server)}
-                    className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-title sfont-medium transition-all duration-200 border border-transparent
+                    className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-title font-medium transition-all duration-200 border border-transparent
                       ${currentServer.name === server.name 
                         ? "bg-purple-600/90 text-white shadow-md border-purple-500/50" 
                         : "bg-[#222] text-gray-400 hover:bg-[#2a2a2a] hover:text-white"

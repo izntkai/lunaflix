@@ -1,156 +1,11 @@
 import { useEffect, useState, useRef } from "react";
 import { useNavigate } from "react-router-dom";
-import { getTrendingMovies, getPopularMovies } from "../services/tmdb";
-import { Play, Info, ChevronRight, ChevronLeft, Star, Search, Calendar, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { getTrendingMovies, getPopularMovies, getTopRatedMovies } from "../services/tmdb";
+import { Play, Info, ChevronRight, ChevronLeft, Star, Calendar } from "lucide-react";
+import { motion } from "framer-motion";
+import Navbar from "../components/Navbar"; // Make sure path matches your structure
 
-// --- 1. Navbar Component (Fixed Centering + Better Search UI) ---
-const Navbar = () => {
-  const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // Search State
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef(null);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 0);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
-  }, []);
-
-  // Focus input when opened
-  useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isSearchOpen]);
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search/${searchQuery}`);
-      setIsSearchOpen(false);
-    }
-  };
-
-  const navLinks = ["Home", "Series", "Movies"];
-
-  return (
-    <nav
-      className={`fixed top-0 z-50 w-full px-4 md:px-12 py-4 transition-all duration-500 ${
-        isScrolled || isMobileMenuOpen ? "bg-[#141414]/95 backdrop-blur-md shadow-lg" : "bg-transparent"
-      }`}
-    >
-      <div className="flex items-center justify-between relative h-10">
-        
-        {/* --- Logo (Left) --- */}
-        <div 
-          className="text-2xl font-logo text-purple-400 tracking-wider cursor-pointer z-50 shrink-0"
-          onClick={() => navigate("/")}
-        >
-          LUNA<span className="text-white font-light">FLIX</span>
-        </div>
-
-        {/* --- Desktop Menu (Absolutely Centered) --- */}
-        {/* This stays centered regardless of left/right content width */}
-        <div className="hidden md:flex gap-8 text-sm text-gray-300 font-title absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {navLinks.map((item) => (
-            <span key={item} className="hover:text-white cursor-pointer transition hover:scale-105 duration-200">
-              {item}
-            </span>
-          ))}
-        </div>
-
-        {/* --- Right Side Icons (Search + Mobile Toggle) --- */}
-        <div className="flex items-center gap-2 text-white z-50">
-          
-          {/* Enhanced Search Bar */}
-          <form onSubmit={handleSearch} className="flex items-center">
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ 
-                width: isSearchOpen ? "240px" : "0px", 
-                opacity: isSearchOpen ? 1 : 0
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="overflow-hidden relative"
-            >
-              <input
-                ref={searchInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What to watch?"
-                className="w-full bg-white/10 border border-white/10 rounded-full py-1.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:bg-black/50 focus:border-purple-500/50 transition-all placeholder:text-gray-400"
-              />
-              {/* Close/Clear Button inside input */}
-              {isSearchOpen && (
-                 <X 
-                  size={14} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setIsSearchOpen(false);
-                  }} 
-                 />
-              )}
-            </motion.div>
-
-            <button 
-              type="button" 
-              onClick={() => {
-                if(isSearchOpen && searchQuery.trim()) {
-                  handleSearch({ preventDefault: () => {} });
-                } else {
-                  setIsSearchOpen(!isSearchOpen);
-                }
-              }}
-              className={`p-2 rounded-full transition-colors ${isSearchOpen ? 'text-purple-400' : 'hover:bg-white/10'}`}
-            >
-              <Search size={20} />
-            </button>
-          </form>
-          
-          {/* Mobile Hamburger Button */}
-          <button 
-            className="md:hidden text-white hover:text-gray-300 transition p-1"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
-
-      {/* Mobile Menu Overlay */}
-      <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-[#141414] border-t border-white/10 shadow-2xl md:hidden overflow-hidden mt-4 rounded-xl"
-          >
-            <div className="flex flex-col items-center py-6 space-y-6">
-              {navLinks.map((item) => (
-                <span 
-                  key={item} 
-                  className="text-gray-200 text-lg font-medium hover:text-purple-400 cursor-pointer transition"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item}
-                </span>
-              ))}
-            </div>
-          </motion.div>
-        )}
-      </AnimatePresence>
-    </nav>
-  );
-};
-
-// --- 2. REDESIGNED HERO: Compact Cinematic Card ---
+// --- Sub-Component: Hero Section ---
 const Hero = ({ movie }) => {
   const navigate = useNavigate();
   if (!movie) return <div className="h-[60vh] w-full bg-[#1a1a1a] animate-pulse rounded-2xl mx-4 mt-24" />;
@@ -244,7 +99,7 @@ const Hero = ({ movie }) => {
   );
 };
 
-// --- 3. REDESIGNED MOVIE CARD: Compact & UI Rich ---
+// --- Sub-Component: Movie Card ---
 const MovieCard = ({ movie }) => {
   const navigate = useNavigate();
 
@@ -255,7 +110,7 @@ const MovieCard = ({ movie }) => {
       initial={{ opacity: 0 }}
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
-      className="relative flex-none w-35 md:w-45aspect-2/3 cursor-pointer group"
+      className="relative flex-none w-35 md:w-45 aspect-2/3 cursor-pointer group"
       onClick={() => navigate(`/watch/${movie.id}`)}
     >
       <div className="w-full h-full rounded-xl overflow-hidden relative shadow-lg bg-[#202020] ring-1 ring-white/10 group-hover:ring-white/30 transition-all duration-300">
@@ -294,7 +149,7 @@ const MovieCard = ({ movie }) => {
   );
 };
 
-// --- 4. Interactive Row with Paddles ---
+// --- Sub-Component: Movie Row ---
 const MovieRow = ({ title, movies }) => {
   const rowRef = useRef(null);
 
@@ -344,7 +199,7 @@ const MovieRow = ({ title, movies }) => {
   );
 };
 
-// --- 5. Skeleton Loader ---
+// --- Sub-Component: Skeleton Loader ---
 const HomeSkeleton = () => (
   <div className="bg-[#141414] min-h-screen animate-pulse">
     <div className="h-[80vh] bg-gray-800 w-full" />
@@ -365,24 +220,26 @@ const HomeSkeleton = () => (
 
 // --- Main Page Component ---
 export default function Home() {
-  const [data, setData] = useState({ trending: [], popular: [], featured: null });
+  const [data, setData] = useState({ trending: [], popular: [], topRated: [], featured: null });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [trendingRes, popularRes] = await Promise.all([
+        const [trendingRes, popularRes, topRatedRes] = await Promise.all([
           getTrendingMovies(),
           getPopularMovies(),
+          getTopRatedMovies(), 
         ]);
         
         const trending = trendingRes.results || [];
         const popular = popularRes.results || [];
+        const topRated = topRatedRes.results || [];
         const randomFeatured = trending.length > 0 
           ? trending[Math.floor(Math.random() * trending.length)] 
           : null;
 
-        setData({ trending, popular, featured: randomFeatured });
+        setData({ trending, popular, topRated, featured: randomFeatured });
       } catch (error) {
         console.error("Fetch error:", error);
       } finally {
@@ -405,12 +262,11 @@ export default function Home() {
       {/* Content Stack */}
       <div className="relative z-10 -mt-1 md:-mt-1 bg-transparent pb-20">
         <MovieRow title="Trending Now" movies={data.trending} />
+        <MovieRow title="Top Rated Movies" movies={data.topRated} />
         <MovieRow title="Top Picks for You" movies={data.popular} />
-        <MovieRow title="Action Thrillers" movies={[...data.popular].reverse()} />
-        <MovieRow title="New Releases" movies={[...data.trending].reverse()} />
       </div>
 
-      <footer className="py-12 text-center text-gray-600 text-sm bg-black/50">
+      <footer className="py-12 px-10 text-center text-gray-600 text-xs md:text-sm bg-black/50">
         <p className="mb-2">Disclaimer: This website does not own, store, or host any movie player content. <br />All streaming players are embedded through third-party hosting services using their respective APIs.</p>
         <p>© 2026 Lunaflix</p>
       </footer>
