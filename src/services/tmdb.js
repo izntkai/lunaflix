@@ -1,5 +1,13 @@
-const API_KEY = "9f6076fcc8d60ea3d15d26eda84a5730"; // replace with your TMDB key
-const BASE_URL = "https://api.themoviedb.org/3";
+const BASE_URL = "/.netlify/functions/tmdb-proxy";
+const API_KEY = "";
+export async function fetchMovies(endpoint, params = {}) {
+  const query = new URLSearchParams(params).toString();
+  // Notice: NO api_key here! The proxy adds it.
+  const res = await fetch(`${BASE_URL}${endpoint}?${query}`);
+  
+  if (!res.ok) throw new Error("Failed to fetch");
+  return res.json();
+}
 
 // Get popular movies
 export async function getPopularMovies() {
