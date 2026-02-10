@@ -1,35 +1,47 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { searchMovies } from "../services/tmdb"; 
-import { Search as SearchIcon, Film, Calendar, Star, ArrowLeft, Loader2 } from "lucide-react";
+import { searchMulti } from "../services/tmdb"; // Updated import
+import { Search as SearchIcon, Film, Star, ArrowLeft, Loader2, Tv } from "lucide-react";
 import { motion } from "framer-motion";
 
 // --- Sub-Component: Compact Search Card ---
-const SearchCard = ({ movie }) => {
+const SearchCard = ({ item }) => {
+  // Determine properties based on media type (Movie vs TV)
+  const isMovie = item.media_type === "movie" || item.title;
+  const title = item.title || item.name;
+  const date = item.release_date || item.first_air_date;
+  const type = item.media_type || (item.title ? "movie" : "tv");
+
   return (
-    <Link to={`/watch/${movie.id}`} className="group relative block w-full aspect-2/3 bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300">
-      {movie.poster_path ? (
+    <Link 
+      to={`/watch/${type}/${item.id}`} 
+      className="group relative block w-full aspect-[2/3] bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300"
+    >
+      {item.poster_path ? (
         <img
-          src={`https://image.tmdb.org/t/p/w400${movie.poster_path}`}
-          alt={movie.title}
+          src={`https://image.tmdb.org/t/p/w400${item.poster_path}`}
+          alt={title}
           className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
           loading="lazy"
         />
       ) : (
         <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 bg-[#1a1a1a]">
-          <Film size={24} className="mb-2 opacity-50" />
+          {isMovie ? <Film size={24} className="mb-2 opacity-50" /> : <Tv size={24} className="mb-2 opacity-50" />}
           <span className="text-xs">No Image</span>
         </div>
       )}
 
       {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-linear-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-        <h3 className="text-white text-sm font-title font-semibold truncate mb-1">{movie.title}</h3>
+      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
+        <h3 className="text-white text-sm font-title font-semibold truncate mb-1">{title}</h3>
         <div className="font-subtitle flex items-center justify-between text-[10px] text-gray-300">
           <span className="flex items-center gap-1 text-purple-500">
-            <Star size={10} fill="currentColor" /> {movie.vote_average?.toFixed(1)}
+            <Star size={10} fill="currentColor" /> {item.vote_average?.toFixed(1)}
           </span>
-          <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
+          <div className="flex items-center gap-2">
+            <span className="uppercase border border-white/20 px-1 rounded text-[8px]">{type}</span>
+            <span>{date?.split("-")[0] || "N/A"}</span>
+          </div>
         </div>
       </div>
     </Link>
@@ -53,15 +65,17 @@ export default function Search() {
     setLoading(true);
     const delayDebounce = setTimeout(() => {
       if (query) {
-        searchMovies(query).then((data) => {
-          setResults(data.results || []);
+        searchMulti(query).then((data) => {
+          // Filter out people, keeping only movies and tv shows
+          const filtered = (data.results || []).filter(item => item.media_type !== "person");
+          setResults(filtered);
           setLoading(false);
         });
       } else {
         setResults([]);
         setLoading(false);
       }
-    }, 300); // Small debounce to prevent flickering
+    }, 300); 
 
     return () => clearTimeout(delayDebounce);
   }, [query]);
@@ -80,7 +94,7 @@ export default function Search() {
       <div className="sticky top-0 z-40 bg-[#141414]/95 backdrop-blur-md border-b border-white/5 py-4 px-4 md:px-8">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <button 
-            onClick={() => navigate('/')} 
+            onClick={() => navigate(-1)} 
             className="p-2 rounded-full hover:bg-white/10 transition text-gray-400 hover:text-white"
           >
             <ArrowLeft size={20} />
@@ -92,7 +106,7 @@ export default function Search() {
               type="text" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search movies..." 
+              placeholder="Search movies & TV shows..." 
               className="w-full bg-[#202020] font-title text-sm text-white pl-10 pr-4 py-2 rounded-lg border border-transparent focus:border-white/20 focus:bg-[#252525] outline-none transition-all placeholder:text-gray-600"
             />
           </form>
@@ -128,8 +142,8 @@ export default function Search() {
             transition={{ duration: 0.3 }}
             className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4"
           >
-            {results.map((movie) => (
-              <SearchCard key={movie.id} movie={movie} />
+            {results.map((item) => (
+              <SearchCard key={item.id} item={item} />
             ))}
           </motion.div>
         )}

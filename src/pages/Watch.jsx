@@ -4,97 +4,101 @@ import { getMovieInfo, getTvInfo } from "../services/tmdb";
 import Navbar from "../components/Navbar";
 import { 
   ArrowLeft, Server, Calendar, Star, Clock, 
-  ShieldCheck, Loader2, Cast, ThumbsUp, Share2, ChevronDown, Play 
+  ShieldCheck, Loader2, Cast, ThumbsUp, Share2, Users,
+  ChevronDown, Layers 
 } from "lucide-react";
 import { motion } from "framer-motion";
 
+// Updated servers to handle TV Seasons/Episodes
 const servers = [
-  { 
-    name: "VidSrc", 
-    url: (id, type, s, e) => type === 'tv' 
-      ? `https://vidsrc.to/embed/tv/${id}/${s}/${e}` 
-      : `https://vidsrc.to/embed/movie/${id}` 
-  },
-  { 
-    name: "VidLink", 
-    url: (id, type, s, e) => type === 'tv' 
-      ? `https://vidlink.pro/tv/${id}/${s}/${e}` 
-      : `https://vidlink.pro/movie/${id}` 
-  },
-  { 
-    name: "Vidsrc CC", 
-    url: (id, type, s, e) => type === 'tv' 
-      ? `https://vidsrc.cc/v2/embed/tv/${id}/${s}/${e}` 
-      : `https://vidsrc.cc/v2/embed/movie/${id}` 
-  },
-  { 
-    name: "SuperEmbed", 
-    url: (id, type, s, e) => type === 'tv'
-      ? `https://multiembed.mov/?video_id=${id}&tmdb=1&type=tv&season=${s}&episode=${e}`
-      : `https://multiembed.mov/?video_id=${id}&tmdb=1` 
-  },
-  { 
-    name: "VidFast", 
-    url: (id, type, s, e) => type === 'tv' 
-      ? `https://vidfast.pro/tv/${id}/${s}/${e}` 
-      : `https://vidfast.pro/movie/${id}` 
-  },
-  { 
-    name: "Smashy", 
-    url: (id, type, s, e) => type === 'tv'
-      ? `https://player.smashy.stream/tv/${id}?s=${s}&e=${e}`
-      : `https://player.smashy.stream/movie/${id}`
-  },
+  { name: "VidSrc", url: (id, type, s, e) => `https://vidsrc.to/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
+  { name: "Vidsrc CC", url: (id, type, s, e) => `https://vidsrc.cc/v2/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
+  { name: "VidSrc Pro", url: (id, type, s, e) => `https://vidsrc.me/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
+  { name: "VidFast", url: (id, type, s, e) => `https://vidfast.pro/${type}/${id}${type === 'tv' ? `?s=${s}&e=${e}` : ''}` },
+  { name: "VidLink", url: (id, type, s, e) => `https://vidlink.pro/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
+  { name: "VidKing", url: (id, type, s, e) => `https://www.vidking.net/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}?color=9146ff` },
+  { name: "SuperEmbed", url: (id, type, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1${type === 'tv' ? `&s=${s}&e=${e}` : ''}` },
+  { name: "Smashy", url: (id, type, s, e) => `https://player.smashy.stream/${type}/${id}${type === 'tv' ? `?s=${s}&e=${e}` : ''}` },
 ];
 
 export default function Watch() {
   const { id } = useParams();
-  const location = useLocation();
   const navigate = useNavigate();
-  
-  // Detect type from URL
+  const location = useLocation();
+
+  // Detect if it's a TV show based on URL
   const isTv = location.pathname.includes("/tv/");
   const mediaType = isTv ? "tv" : "movie";
 
   const [currentServer, setCurrentServer] = useState(servers[0]);
-  const [media, setMedia] = useState(null);
+  const [movie, setMovie] = useState(null);
   const [loading, setLoading] = useState(true);
   const [iframeLoading, setIframeLoading] = useState(true);
+  const [canInteract, setCanInteract] = useState(false);
   
-  // TV Show State
+  // Episode State
   const [season, setSeason] = useState(1);
   const [episode, setEpisode] = useState(1);
 
   useEffect(() => {
     window.scrollTo(0, 0);
     const fetchFunc = isTv ? getTvInfo : getMovieInfo;
+    
     fetchFunc(id).then((data) => {
-      setMedia(data);
+      setMovie(data);
       setLoading(false);
     });
+
+    const timer = setTimeout(() => setCanInteract(true), 800);
+    return () => clearTimeout(timer);
   }, [id, isTv]);
 
-  useEffect(() => { setIframeLoading(true); }, [currentServer, season, episode]);
+  useEffect(() => {
+    setIframeLoading(true);
+  }, [currentServer, season, episode]); // Reload iframe on season/episode change
 
-  if (loading) return (
-    <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
-      <Loader2 className="animate-spin text-purple-500 w-10 h-10" />
-    </div>
-  );
+  const getCrewMember = (job) => movie?.credits?.crew?.find(c => c.job === job);
+  const getWriter = () => movie?.credits?.crew?.find(c => ["Screenplay", "Writer", "Story"].includes(c.job));
 
-  const title = media?.title || media?.name;
-  const releaseDate = media?.release_date || media?.first_air_date;
-  const runtime = media?.runtime || (media?.episode_run_time ? media.episode_run_time[0] : null);
-
-  // Helper to get episode count for the selected season
-  const currentSeasonData = media?.seasons?.find(s => s.season_number === season);
+  // TV Logic: Calculate episodes for selected season
+  const currentSeasonData = movie?.seasons?.find(s => s.season_number === Number(season));
   const totalEpisodes = currentSeasonData?.episode_count || 0;
   const episodeList = Array.from({ length: totalEpisodes }, (_, i) => i + 1);
 
+  const CrewCard = ({ label, person }) => (
+    <Link 
+      to={person ? `/person/${person.id}` : "#"} 
+      className={`flex items-center gap-3 group transition-transform hover:scale-105 ${!person && 'pointer-events-none'}`}
+    >
+      <div className="w-10 h-10 rounded-full overflow-hidden border border-white/10 bg-gray-800 shrink-0 group-hover:border-purple-500/50 transition-colors">
+        {person?.profile_path ? (
+          <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} className="w-full h-full object-cover" />
+        ) : (
+          <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-500">N/A</div>
+        )}
+      </div>
+      <div>
+        <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-wider leading-none mb-1 group-hover:text-purple-400 transition-colors">{label}</span>
+        <p className="text-xs text-white font-medium truncate max-w-25">{person?.name || "N/A"}</p>
+      </div>
+    </Link>
+  );
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
+        <Loader2 className="animate-spin text-purple-500 w-10 h-10" />
+      </div>
+    );
+  }
+
+  const title = movie?.title || movie?.name;
+  const releaseDate = movie?.release_date || movie?.first_air_date;
+
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-gray-100 selection:bg-purple-500/30 pb-12">
+    <div className={`min-h-screen bg-[#0f0f0f] text-gray-100 font-sans selection:bg-purple-500 selection:text-white pb-12 transition-opacity duration-500 ${canInteract ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-90"}`}>
       <style>{`
-        .custom-scrollbar::-webkit-scrollbar { height: 6px; width: 6px; }
+        .custom-scrollbar::-webkit-scrollbar { height: 6px; }
         .custom-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(145, 70, 255, 0.4); border-radius: 10px; }
         .custom-scrollbar::-webkit-scrollbar-thumb:hover { background: rgba(145, 70, 255, 0.7); }
@@ -102,149 +106,226 @@ export default function Watch() {
 
       <Navbar />
       
-      <div className="relative z-10 max-w-5xl mx-auto pt-24 px-4">
-        <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-4 text-sm text-gray-500 hover:text-white transition group">
-          <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" /> Back
-        </button>
+      <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
+        <div className="absolute inset-0 bg-[#0f0f0f]/95 z-10" />
+        <img
+          src={`https://image.tmdb.org/t/p/original${movie?.backdrop_path}`}
+          alt="background"
+          className="w-full h-full object-cover blur-3xl opacity-20"
+        />
+      </div>
 
-        {/* Video Player */}
-        <div className="w-full aspect-video bg-black rounded-xl overflow-hidden shadow-2xl border border-white/10 relative">
+      <div className="relative z-10 max-w-5xl mx-auto pt-24 px-4 py-4">
+        <div className="flex items-center justify-between mb-4">
+          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition group text-sm cursor-pointer">
+            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
+            <span className="font-medium">Back</span>
+          </button>
+        </div>
+
+        <motion.div 
+          initial={{ opacity: 0, y: 10 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ duration: 0.4 }}
+          className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg border border-white/10 relative"
+        >
           {iframeLoading && (
             <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-10">
               <Loader2 className="animate-spin text-purple-500 w-8 h-8 mb-2" />
-              <p className="text-gray-500 text-xs animate-pulse">Loading Secure Stream...</p>
+              <p className="text-gray-500 text-xs animate-pulse">Loading secure stream...</p>
             </div>
           )}
           <iframe
-            key={`${currentServer.name}-${season}-${episode}`}
+            key={currentServer.name}
             src={currentServer.url(id, mediaType, season, episode)}
-            className="w-full h-full"
+            className={`w-full h-full transition-opacity duration-500 ${iframeLoading ? "opacity-0" : "opacity-100"}`}
             allowFullScreen
             onLoad={() => setIframeLoading(false)}
+            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
           />
-        </div>
+        </motion.div>
 
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 mt-8">
-          <div className="lg:col-span-2 space-y-6">
-            
-            {/* --- TV SHOW EPISODE SELECTOR --- */}
-            {isTv && media?.seasons && (
-              <div className="bg-[#161616] border border-white/5 rounded-xl p-5 mb-6">
-                <div className="flex items-center justify-between mb-4">
-                  <h3 className="text-sm font-bold text-white flex items-center gap-2">
-                    <Play size={14} className="text-purple-500" /> Episodes
-                  </h3>
-                  
-                  {/* Season Dropdown */}
-                  <div className="relative">
-                    <select 
-                      value={season} 
-                      onChange={(e) => {
-                        setSeason(Number(e.target.value));
-                        setEpisode(1); // Reset episode when season changes
-                      }}
-                      className="bg-[#222] text-xs font-bold text-white px-3 py-1.5 pr-8 rounded-lg appearance-none border border-white/10 outline-none focus:border-purple-500 cursor-pointer"
-                    >
-                      {media.seasons
-                        .filter(s => s.season_number > 0) // Filter out Season 0 (Specials) if desired
-                        .map((s) => (
-                          <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
-                      ))}
-                    </select>
-                    <ChevronDown size={14} className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" />
-                  </div>
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            transition={{ delay: 0.2 }}
+            className="lg:col-span-2 space-y-4"
+          >
+            {/* MOBILE ONLY: Server Dropdown above Title */}
+            <div className="block lg:hidden mb-2 space-y-2">
+              <div className="relative">
+                <select 
+                  value={currentServer.name}
+                  onChange={(e) => setCurrentServer(servers.find(s => s.name === e.target.value))}
+                  className="w-full bg-[#161616] text-white text-sm py-2.5 px-4 pr-10 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                >
+                  {servers.map((server) => (
+                    <option key={server.name} value={server.name}>Server: {server.name}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
+              </div>
+
+              {/* MOBILE ONLY: TV Selectors */}
+              {isTv && (
+                <div className="grid grid-cols-2 gap-2">
+                   <div className="relative">
+                      <select 
+                        value={season}
+                        onChange={(e) => { setSeason(e.target.value); setEpisode(1); }}
+                        className="w-full bg-[#161616] text-white text-sm py-2.5 px-4 pr-10 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                      >
+                         {movie?.seasons?.filter(s => s.season_number > 0).map(s => (
+                           <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
+                         ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
+                   </div>
+                   <div className="relative">
+                      <select 
+                        value={episode}
+                        onChange={(e) => setEpisode(e.target.value)}
+                        className="w-full bg-[#161616] text-white text-sm py-2.5 px-4 pr-10 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                      >
+                         {episodeList.map(ep => (
+                           <option key={ep} value={ep}>Episode {ep}</option>
+                         ))}
+                      </select>
+                      <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
+                   </div>
                 </div>
+              )}
+            </div>
 
-                {/* Episode Grid */}
-                <div className="grid grid-cols-4 sm:grid-cols-5 md:grid-cols-8 gap-2 max-h-40 overflow-y-auto custom-scrollbar pr-2">
-                  {episodeList.map((epNum) => (
-                    <button
-                      key={epNum}
-                      onClick={() => setEpisode(epNum)}
-                      className={`text-xs py-2 rounded-md font-medium transition-all duration-200 border border-transparent
-                        ${episode === epNum 
-                          ? "bg-purple-600 text-white shadow-md border-purple-500" 
-                          : "bg-[#252525] text-gray-400 hover:bg-[#333] hover:text-white"
-                        }`}
-                    >
-                      {epNum}
-                    </button>
+            <div>
+              <h1 className="text-2xl md:text-3xl font-bold font-title text-white mb-2 tracking-tight">
+                {title}
+              </h1>
+              
+              <div className="font-paragraph flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-400">
+                <span className="flex items-center gap-1 text-yellow-400 font-semibold">
+                  <Star size={14} fill="currentColor" /> {movie?.vote_average?.toFixed(1)}
+                </span>
+                <span className="flex items-center gap-1"><Calendar size={14} /> {releaseDate?.split("-")[0]}</span>
+                {movie?.runtime && <span className="flex items-center gap-1"><Clock size={14} /> {movie?.runtime}m</span>}
+                {isTv && <span className="px-1.5 py-0.5 rounded border border-purple-500/50 text-purple-300 text-[10px] uppercase font-bold">{movie?.number_of_seasons} Seasons</span>}
+                <span className="px-1.5 py-0.5 rounded border border-gray-700 text-[10px] uppercase">HD</span>
+                <span className="px-1.5 py-0.5 rounded bg-purple-600/20 text-purple-300 text-[10px] uppercase border border-purple-500/30">
+                  {movie?.genres?.[0]?.name}
+                </span>
+              </div>
+            </div>
+
+            <div className="flex items-center gap-2 py-3 border-y border-white/5">
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-full transition text-xs font-medium cursor-pointer"><ThumbsUp size={14} /> Like</button>
+              <button className="flex items-center gap-1.5 px-3 py-1.5 bg-white/5 hover:bg-white/10 rounded-full transition text-xs font-medium cursor-pointer"><Share2 size={14} /> Share</button>
+              <div className="flex-1" />
+              <div className="flex items-center gap-1.5 text-purple-400 text-xs"><ShieldCheck size={14} /> Secure</div>
+            </div>
+
+            <div>
+              <p className="font-paragraph text-gray-300 leading-relaxed text-sm">{movie?.overview}</p>
+            </div>
+
+            <div className="font-title grid grid-cols-1 md:grid-cols-3 gap-6 py-4 border-t border-white/5">
+                <CrewCard label="Director" person={getCrewMember("Director")} />
+                <CrewCard label="Writer" person={getWriter()} />
+                <CrewCard label="Cinematography" person={getCrewMember("Director of Photography")} />
+            </div>
+
+            {movie?.credits?.cast?.length > 0 && (
+              <div className="pt-2">
+                <h3 className="text-lg font-title font-semibold text-white mb-3 flex items-center gap-1.5"><Cast size={14} /> Cast</h3>
+                <div 
+                  className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar"
+                  style={{ maskImage: 'linear-gradient(to right, black 85%, transparent 100%)', WebkitMaskImage: 'linear-gradient(to right, black 85%, transparent 100%)' }}
+                >
+                  {movie.credits.cast.slice(0, 15).map((actor) => (
+                    <Link to={`/person/${actor.id}`} key={actor.id} className="flex-none w-20 text-center group">
+                      <div className="w-16 h-16 mx-auto mb-2 rounded-xl overflow-hidden border border-white/10 group-hover:border-purple-500 transition-all duration-300 group-hover:shadow-[0_0_15px_rgba(145,70,255,0.3)]">
+                        {actor.profile_path ? (
+                          <img src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`} alt={actor.name} className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500" />
+                        ) : (
+                          <div className="w-full h-full bg-gray-800 flex items-center justify-center text-[10px]">N/A</div>
+                        )}
+                      </div>
+                      <p className="text-[11px] text-white font-title px-1 group-hover:text-purple-400 transition-colors truncate font-medium">{actor.name}</p>
+                      <p className="text-[9px] text-gray-500 truncate px-1 italic">{actor.character}</p>
+                    </Link>
                   ))}
                 </div>
               </div>
             )}
+          </motion.div>
 
-            <header>
-              <h1 className="text-3xl font-bold mb-2 text-white">{title}</h1>
-              <div className="flex items-center gap-4 text-sm text-gray-400">
-                <span className="flex items-center gap-1 text-yellow-500 font-bold">
-                  <Star size={14} fill="currentColor" /> {media?.vote_average?.toFixed(1)}
-                </span>
-                <span>{releaseDate?.split("-")[0]}</span>
-                {runtime && <span>{runtime}m</span>}
-                {isTv && <span className="text-purple-400 font-bold">S{season}:E{episode}</span>}
-                <span className="text-[10px] border border-gray-700 px-1 rounded uppercase">HD</span>
-              </div>
-            </header>
+          <motion.div initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} transition={{ delay: 0.3 }} className="hidden lg:block lg:col-span-1">
+            <div className="space-y-4 sticky top-4">
+                
+                {/* DESKTOP SIDEBAR: TV Episodes (NOW FIRST) */}
+                {isTv && (
+                  <div className="bg-[#161616] border border-white/5 rounded-xl p-4">
+                      <h3 className="text-sm font-title font-semibold text-white flex items-center gap-2 mb-3">
+                        <Layers size={14} className="text-purple-500" /> Episodes
+                      </h3>
+                      <div className="space-y-3">
+                        <div className="relative">
+                          <span className="text-[10px] text-gray-500 uppercase font-bold ml-1 mb-1 block">Season</span>
+                          <select 
+                            value={season}
+                            onChange={(e) => { setSeason(e.target.value); setEpisode(1); }}
+                            className="w-full bg-[#222] text-white text-sm py-2 px-3 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                          >
+                              {movie?.seasons?.filter(s => s.season_number > 0).map(s => (
+                                <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
+                              ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-8 text-gray-400 pointer-events-none" size={14} />
+                        </div>
 
-            <p className="text-gray-300 leading-relaxed text-sm md:text-base">{media?.overview}</p>
+                        <div className="relative">
+                          <span className="text-[10px] text-gray-500 uppercase font-bold ml-1 mb-1 block">Episode</span>
+                          <select 
+                            value={episode}
+                            onChange={(e) => setEpisode(e.target.value)}
+                            className="w-full bg-[#222] text-white text-sm py-2 px-3 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none transition-all cursor-pointer"
+                          >
+                              {episodeList.map(ep => (
+                                <option key={ep} value={ep}>Episode {ep}</option>
+                              ))}
+                          </select>
+                          <ChevronDown className="absolute right-3 top-8 text-gray-400 pointer-events-none" size={14} />
+                        </div>
+                      </div>
+                  </div>
+                )}
 
-            {/* Cast List */}
-            <div className="pt-6 border-t border-white/5">
-              <h3 className="text-sm font-bold uppercase tracking-widest text-gray-500 mb-4">Top Cast</h3>
-              <div className="flex gap-4 overflow-x-auto pb-4 custom-scrollbar">
-                {media?.credits?.cast?.slice(0, 12).map(actor => (
-                  <Link key={actor.id} to={`/person/${actor.id}`} className="shrink-0 w-20 group">
-                    <div className="w-16 h-16 mx-auto mb-2 rounded-full overflow-hidden border border-white/10 group-hover:border-purple-500 transition-colors">
-                      {actor.profile_path ? (
-                        <img src={`https://image.tmdb.org/t/p/w200${actor.profile_path}`} className="w-full h-full object-cover" alt={actor.name} />
-                      ) : (
-                        <div className="w-full h-full bg-gray-800 flex items-center justify-center text-[8px]">N/A</div>
-                      )}
-                    </div>
-                    <p className="text-[10px] mt-2 text-white truncate text-center font-medium">{actor.name}</p>
-                  </Link>
-                ))}
-              </div>
+                {/* DESKTOP SIDEBAR: Servers (NOW SECOND) */}
+                <div className="bg-[#161616] border border-white/5 rounded-xl p-4">
+                  <div className="flex items-center justify-between mb-3">
+                    <h3 className="text-sm font-title font-semibold text-white flex items-center gap-2">
+                      <Server size={14} className="text-purple-500" /> Servers
+                    </h3>
+                  </div>
+                  <div className="grid grid-cols-2 gap-2">
+                    {servers.map((server) => (
+                      <button
+                        key={server.name}
+                        onClick={() => setCurrentServer(server)}
+                        className={`flex items-center justify-center px-3 py-2 rounded-lg text-xs font-title font-medium transition-all duration-200 border border-transparent cursor-pointer
+                          ${currentServer.name === server.name 
+                            ? "bg-purple-600/90 text-white shadow-md border-purple-500/50" 
+                            : "bg-[#222] text-gray-400 hover:bg-[#2a2a2a] hover:text-white"
+                          }`}
+                      >
+                        {server.name}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
             </div>
-          </div>
-
-          <aside className="space-y-4">
-             {/* Server Selector */}
-             <div className="bg-[#161616] p-4 rounded-xl border border-white/10 sticky top-4">
-               <h3 className="text-xs font-bold uppercase text-gray-500 mb-4 flex items-center gap-2">
-                 <Server size={14} className="text-purple-500"/> Select Server
-               </h3>
-               
-               {/* Mobile Dropdown for Server */}
-               <div className="lg:hidden relative mb-2">
-                  <select 
-                    onChange={(e) => setCurrentServer(servers.find(s => s.name === e.target.value))}
-                    className="w-full bg-[#222] text-white text-xs py-2.5 px-3 rounded-lg appearance-none border border-white/10 focus:border-purple-500 outline-none"
-                  >
-                    {servers.map(s => <option key={s.name} value={s.name}>{s.name}</option>)}
-                  </select>
-                  <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 pointer-events-none" size={14} />
-               </div>
-
-               {/* Desktop List for Server */}
-               <div className="hidden lg:grid grid-cols-1 gap-2">
-                 {servers.map(s => (
-                   <button 
-                    key={s.name} 
-                    onClick={() => setCurrentServer(s)}
-                    className={`text-left px-4 py-2.5 rounded-lg text-xs font-bold transition-all border border-transparent
-                      ${currentServer.name === s.name 
-                        ? 'bg-purple-600 text-white shadow-lg border-purple-500/50' 
-                        : 'bg-[#222] text-gray-400 hover:bg-[#2a2a2a] hover:text-white'
-                      }`}
-                   >
-                     {s.name}
-                   </button>
-                 ))}
-               </div>
-             </div>
-          </aside>
+          </motion.div>
         </div>
       </div>
     </div>

@@ -51,7 +51,7 @@ export default function Person() {
               <img 
                 src={`https://image.tmdb.org/t/p/w500${person.profile_path}`}
                 alt={person.name}
-                className="w-40 md:w-full mx-auto rounded-xl shadow-xl border border-white/5 object-cover aspect-2/3"
+                className="w-40 md:w-full mx-auto rounded-xl shadow-xl border border-white/5 object-cover aspect-[2/3]"
               />
             </div>
             
@@ -97,7 +97,8 @@ export default function Person() {
                 {sortedCredits.map((media) => (
                   <Link 
                     key={media.id} 
-                    to={`/watch/${media.id}`}
+                    // UPDATED LINK: Detects media_type (movie/tv) correctly
+                    to={`/watch/${media.media_type || (media.title ? "movie" : "tv")}/${media.id}`}
                     className="group flex flex-col gap-2"
                   >
                     <div className="aspect-2/3 relative overflow-hidden rounded-lg border border-white/5 group-hover:border-purple-500 transition-colors">

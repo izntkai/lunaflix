@@ -1,154 +1,179 @@
-import { useEffect, useState, useRef } from "react";
-import { useNavigate, Link } from "react-router-dom"; 
-import { Search, Menu, X } from "lucide-react";
+import { useState, useEffect } from "react";
+import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Search, Menu, X, Home, Film, Tv } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
-const Navbar = () => {
+export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  
-  // Search State
   const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [searchQuery, setSearchQuery] = useState("");
-  const searchInputRef = useRef(null);
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const [query, setQuery] = useState("");
+  
   const navigate = useNavigate();
+  const location = useLocation();
 
+  // Handle Scroll Effect
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 0);
+    const handleScroll = () => {
+      setIsScrolled(window.scrollY > 50);
+    };
     window.addEventListener("scroll", handleScroll);
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  useEffect(() => {
-    if (isSearchOpen && searchInputRef.current) {
-      searchInputRef.current.focus();
-    }
-  }, [isSearchOpen]);
-
+  // Handle Search Submit
   const handleSearch = (e) => {
     e.preventDefault();
-    if (searchQuery.trim()) {
-      navigate(`/search/${searchQuery}`);
+    if (query.trim()) {
+      navigate(`/search/${query}`);
       setIsSearchOpen(false);
+      setIsMobileMenuOpen(false);
     }
   };
 
-  const navLinks = [
-    { name: "Home", path: "/" }, 
-    { name: "Series", path: "/series" }, 
-    { name: "Movies", path: "/movies" }
-  ];
+  // Helper for Active Link Styling
+  const NavLink = ({ to, icon: Icon, label }) => {
+    const isActive = location.pathname === to;
+    return (
+      <Link 
+        to={to} 
+        className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-300 group
+          ${isActive ? "text-purple-400" : "text-gray-300 hover:text-white"}`}
+      >
+        {Icon && <Icon size={16} className="mb-0.5" />}
+        {label}
+        {isActive && (
+          <motion.div 
+            layoutId="navbar-indicator"
+            className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]"
+          />
+        )}
+      </Link>
+    );
+  };
 
   return (
-    <nav
-      className={`fixed top-0 z-50 w-full px-4 md:px-12 py-4 transition-all duration-500 ${
-        isScrolled || isMobileMenuOpen ? "bg-[#141414]/95 backdrop-blur-md shadow-lg" : "bg-transparent"
-      }`}
-    >
-      <div className="flex items-center justify-between relative h-10">
-        
-        {/* --- Logo (Left) --- */}
-        <Link 
-          to="/"
-          className="text-lg md:text-2xl font-logo text-purple-400 tracking-wider cursor-pointer z-50 shrink-0 hover:text-purple-300 transition-colors"
-        >
-          LUNA<span className="text-white font-light">FLIX</span>
-        </Link>
-
-        {/* --- Desktop Menu --- */}
-        <div className="hidden md:flex gap-8 text-sm text-gray-300 font-title absolute left-1/2 top-1/2 transform -translate-x-1/2 -translate-y-1/2">
-          {navLinks.map((item) => (
-            <Link 
-              key={item.name} 
-              to={item.path}
-              className="hover:text-white cursor-pointer transition hover:scale-105 duration-200"
-            >
-              {item.name}
-            </Link>
-          ))}
-        </div>
-
-        {/* --- Right Side Icons --- */}
-        <div className="flex items-center gap-2 text-white z-50">
-          <form onSubmit={handleSearch} className="flex items-center">
-            <motion.div
-              initial={{ width: 0, opacity: 0 }}
-              animate={{ 
-                width: isSearchOpen ? "240px" : "0px", 
-                opacity: isSearchOpen ? 1 : 0
-              }}
-              transition={{ duration: 0.3, ease: "easeInOut" }}
-              className="overflow-hidden relative"
-            >
-              <input
-                ref={searchInputRef}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="What to watch?"
-                className="w-full bg-white/10 border border-white/10 rounded-full py-1.5 pl-4 pr-10 text-sm text-white focus:outline-none focus:bg-black/50 focus:border-purple-500/50 transition-all placeholder:text-gray-400"
-              />
-              {isSearchOpen && (
-                 <X 
-                  size={14} 
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 cursor-pointer hover:text-white"
-                  onClick={() => {
-                    setSearchQuery("");
-                    setIsSearchOpen(false);
-                  }} 
-                 />
-              )}
-            </motion.div>
-
-            <button 
-              type="button" 
-              onClick={() => {
-                if(isSearchOpen && searchQuery.trim()) {
-                  handleSearch({ preventDefault: () => {} });
-                } else {
-                  setIsSearchOpen(!isSearchOpen);
-                }
-              }}
-              className={`p-2 rounded-full transition-colors ${isSearchOpen ? 'text-purple-400' : 'hover:bg-white/10'}`}
-            >
-              <Search size={20} />
-            </button>
-          </form>
+    <>
+      <header 
+        className={`fixed top-0 inset-x-0 z-50 transition-all duration-500 border-b 
+          ${isScrolled 
+            ? "bg-[#0f0f0f]/80 backdrop-blur-xl border-white/5 py-3 shadow-lg" 
+            : "bg-linear-to-b from-black/80 to-transparent border-transparent py-5"
+          }`}
+      >
+        <div className="max-w-7xl mx-auto px-4 md:px-8 flex items-center justify-between relative">
           
-          <button 
-            className="md:hidden text-white hover:text-gray-300 transition p-1"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-          >
-            {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
-      </div>
+          {/* 1. LOGO (Left) */}
+          <Link to="/" className="flex items-center gap-2 group z-50 relative" onClick={() => setIsMobileMenuOpen(false)}>
+            <span className="text-xl font-logo tracking-tight text-white block">
+              LUNA<span className="text-purple-500">FLIX</span>
+            </span>
+          </Link>
 
-      {/* Mobile Menu */}
+          {/* 2. DESKTOP NAVIGATION (Absolutely Centered) */}
+          <nav className="hidden md:flex items-center gap-8 absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <NavLink to="/" label="Home" />
+            <NavLink to="/movies" label="Movies" />
+            <NavLink to="/series" label="Series" />
+          </nav>
+
+          {/* 3. RIGHT ACTIONS (Search & Mobile Toggle) */}
+          <div className="flex items-center gap-4 relative z-50">
+            
+            {/* Expandable Search Bar (DESKTOP ONLY) */}
+            <form onSubmit={handleSearch} className="relative hidden md:flex items-center">
+              <AnimatePresence>
+                {isSearchOpen && (
+                  <motion.input
+                    initial={{ width: 0, opacity: 0 }}
+                    animate={{ width: 200, opacity: 1 }}
+                    exit={{ width: 0, opacity: 0 }}
+                    transition={{ duration: 0.3 }}
+                    type="text"
+                    placeholder="What to watch?"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    className="bg-white/10 border border-white/10 rounded-full py-1.5 pl-4 pr-10 text-sm text-white placeholder-gray-400 focus:outline-none focus:border-purple-500 focus:bg-black/50"
+                    autoFocus
+                  />
+                )}
+              </AnimatePresence>
+              
+              <button 
+                type={isSearchOpen ? "submit" : "button"}
+                onClick={(e) => {
+                  if (!isSearchOpen) {
+                    e.preventDefault();
+                    setIsSearchOpen(true);
+                  } else if (!query) {
+                    setIsSearchOpen(false);
+                  }
+                }}
+                className={`p-2 rounded-full transition-colors z-10 ${isSearchOpen ? 'absolute right-0 text-white' : 'text-gray-300 hover:text-white hover:bg-white/10'}`}
+              >
+                <Search size={20} />
+              </button>
+            </form>
+
+            {/* Mobile Hamburger */}
+            <button 
+              onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+              className="md:hidden p-2 text-gray-300 hover:text-white hover:bg-white/10 rounded-full transition-colors z-50"
+            >
+              {isMobileMenuOpen ? <X size={24} /> : <Menu size={24} />}
+            </button>
+          </div>
+        </div>
+      </header>
+
+      {/* 4. MOBILE MENU OVERLAY */}
       <AnimatePresence>
         {isMobileMenuOpen && (
           <motion.div
-            initial={{ opacity: 0, height: 0 }}
-            animate={{ opacity: 1, height: "auto" }}
-            exit={{ opacity: 0, height: 0 }}
-            className="bg-[#141414] border-t border-white/10 shadow-2xl md:hidden overflow-hidden mt-4 rounded-xl"
+            initial={{ opacity: 0, y: -20 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -20 }}
+            className="fixed inset-0 z-40 bg-[#0f0f0f] pt-24 px-6 md:hidden flex flex-col gap-6"
           >
-            <div className="flex flex-col items-center py-6 space-y-6">
-              {navLinks.map((item) => (
-                <Link 
-                  key={item.name} 
-                  to={item.path}
-                  className="text-gray-200 text-lg font-medium hover:text-purple-400 cursor-pointer transition"
-                  onClick={() => setIsMobileMenuOpen(false)}
-                >
-                  {item.name}
-                </Link>
-              ))}
+            {/* Mobile Search (VISIBLE ONLY ON MOBILE MENU) */}
+            <form onSubmit={handleSearch} className="relative">
+              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
+              <input 
+                type="text" 
+                placeholder="Search..." 
+                value={query}
+                onChange={(e) => setQuery(e.target.value)}
+                className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-purple-500 outline-none"
+              />
+            </form>
+
+            {/* Mobile Links */}
+            <div className="flex flex-col gap-2">
+              <Link 
+                to="/" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+              >
+                <Home size={20} /> <span className="text-lg font-medium">Home</span>
+              </Link>
+              <Link 
+                to="/movies" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/movies' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+              >
+                <Film size={20} /> <span className="text-lg font-medium">Movies</span>
+              </Link>
+              <Link 
+                to="/series" 
+                onClick={() => setIsMobileMenuOpen(false)}
+                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/tv' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
+              >
+                <Tv size={20} /> <span className="text-lg font-medium">Series</span>
+              </Link>
             </div>
           </motion.div>
         )}
       </AnimatePresence>
-    </nav>
+    </>
   );
-};
-
-export default Navbar;
+}
