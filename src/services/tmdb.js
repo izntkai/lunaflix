@@ -1,8 +1,8 @@
 const BASE_URL = "/.netlify/functions/tmdb-proxy";
 const API_KEY = "";
+
 export async function fetchMovies(endpoint, params = {}) {
   const query = new URLSearchParams(params).toString();
-  // Notice: NO api_key here! The proxy adds it.
   const res = await fetch(`${BASE_URL}${endpoint}?${query}`);
   
   if (!res.ok) throw new Error("Failed to fetch");
@@ -63,10 +63,17 @@ export function getBackdropUrl(path, size = "w780") {
   return path ? `${IMAGE_BASE}/${size}${path}` : "https://via.placeholder.com/1280x720?text=No+Backdrop";
 }
 
+// Get profile URL (for actors/people)
+export function getProfileUrl(path, size = "h632") {
+  return path ? `${IMAGE_BASE}/${size}${path}` : "https://via.placeholder.com/300x450?text=No+Profile";
+}
+
+// Updated to use the Proxy
 export const getPersonDetails = async (id) => {
   const res = await fetch(
-    `https://api.themoviedb.org/3/person/${id}?api_key=${API_KEY}&append_to_response=combined_credits`
+    `${BASE_URL}/person/${id}?api_key=${API_KEY}&append_to_response=combined_credits`
   );
+  if (!res.ok) throw new Error("Failed to fetch person details");
   return res.json();
 };
 
@@ -116,7 +123,6 @@ export async function discoverMovies({ genre, year, language, minRating, page = 
   if (year) params.append("primary_release_year", year);
   if (language) params.append("with_original_language", language);
   
-  // Logic to handle Ranges (1-3) vs Minimums (7+)
   if (minRating) {
     if (minRating.includes("-")) {
       const [min, max] = minRating.split("-");
@@ -147,7 +153,6 @@ export async function discoverTv({ genre, year, language, minRating, page = 1 })
   if (year) params.append("first_air_date_year", year);
   if (language) params.append("with_original_language", language);
   
-  // Logic to handle Ranges (1-3) vs Minimums (7+)
   if (minRating) {
     if (minRating.includes("-")) {
       const [min, max] = minRating.split("-");
@@ -163,7 +168,6 @@ export async function discoverTv({ genre, year, language, minRating, page = 1 })
   return res.json();
 }
 
-// Add this new function
 export async function searchMulti(query) {
   const res = await fetch(
     `${BASE_URL}/search/multi?api_key=${API_KEY}&language=en-US&query=${encodeURIComponent(query)}&page=1&include_adult=false`
