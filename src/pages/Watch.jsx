@@ -87,18 +87,12 @@ export default function Watch() {
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  // UPDATED: Put Regulars FIRST, then Guest Stars
   const getDisplayCast = () => {
     if (isTv && episodeDetails) {
-      const regulars = episodeDetails.credits?.cast || []; // Main cast for this episode
-      const guests = episodeDetails.guest_stars || [];     // Guest stars for this episode
-      
-      // Combine with Regulars in front
+      const regulars = episodeDetails.credits?.cast || [];
+      const guests = episodeDetails.guest_stars || [];
       const combined = [...regulars, ...guests];
-      
-      // De-duplicate in case TMDB lists an actor in both
       const uniqueCast = Array.from(new Map(combined.map(item => [item.id, item])).values());
-      
       return uniqueCast.slice(0, 25);
     }
     return movie?.credits?.cast?.slice(0, 20) || [];
@@ -180,13 +174,57 @@ export default function Watch() {
           />
         </motion.div>
 
+        {/* MOBILE ONLY CONTROLS */}
+        <div className="lg:hidden mt-4 space-y-3">
+          {isTv && (
+            <div className="grid grid-cols-2 gap-2">
+              <div className="relative">
+                <select 
+                  value={season}
+                  onChange={(e) => { setSeason(e.target.value); setEpisode(1); }}
+                  className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none"
+                >
+                  {movie?.seasons?.filter(s => s.season_number > 0).map(s => (
+                    <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
+              </div>
+              <div className="relative">
+                <select 
+                  value={episode}
+                  onChange={(e) => setEpisode(e.target.value)}
+                  className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none"
+                >
+                  {episodeList.map(ep => (
+                    <option key={ep} value={ep}>Episode {ep}</option>
+                  ))}
+                </select>
+                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
+              </div>
+            </div>
+          )}
+          <div className="relative">
+            <select 
+              value={currentServer.name}
+              onChange={(e) => setCurrentServer(servers.find(s => s.name === e.target.value))}
+              className="w-full bg-purple-600/20 text-purple-300 text-sm py-3 px-4 rounded-xl border border-purple-500/30 outline-none appearance-none font-bold"
+            >
+              {servers.map((server) => (
+                <option key={server.name} value={server.name} className="bg-[#161616] text-white">Server: {server.name}</option>
+              ))}
+            </select>
+            <Server className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none" size={16} />
+          </div>
+        </div>
+
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
           <div className="lg:col-span-2 space-y-4">
             <div>
               <h1 className="text-2xl md:text-3xl font-bold font-title text-white mb-2 tracking-tight">
                 {title} {isTv && <span className="text-purple-500/80 text-lg md:text-xl font-medium ml-2">S{season} E{episode}</span>}
               </h1>
-              
+              {/* ... Rest of Metadata & Overview ... */}
               <div className="font-paragraph flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-400 mb-6">
                 <span className="flex items-center gap-1 text-yellow-400 font-semibold">
                   <Star size={14} fill="currentColor" /> {movie?.vote_average?.toFixed(1)}
@@ -220,9 +258,10 @@ export default function Watch() {
                 <CrewCard label="Producer" person={getCrewMember("Executive Producer")} />
             </div>
 
+            {/* Cast Section */}
             <div className="pt-2">
               <h3 className="text-lg font-title font-semibold text-white mb-3 flex items-center gap-1.5">
-                <Users size={14} /> {isTv ? "Episode Full Cast" : "Movie Cast"}
+                <Users size={14} /> {isTv ? "Episode Cast & Regulars" : "Movie Cast"}
               </h3>
               <div 
                 className="flex gap-4 overflow-x-auto pb-6 custom-cast-scrollbar"
@@ -245,6 +284,7 @@ export default function Watch() {
             </div>
           </div>
 
+          {/* DESKTOP SIDEBAR - Kept as is */}
           <div className="hidden lg:block lg:col-span-1">
             <div className="space-y-4 sticky top-4">
                 {isTv && (
@@ -296,7 +336,7 @@ export default function Watch() {
                         className={`flex items-center justify-center px-3 py-2 rounded-lg text-[10px] font-title font-bold uppercase tracking-wider transition-all duration-200 border border-transparent cursor-pointer
                           ${currentServer.name === server.name 
                             ? "bg-purple-600 text-white shadow-lg border-purple-500/50" 
-                            : "bg-[#222] text-gray-500 hover:bg-[#2a2a2a] hover:text-white"
+                            : "bg-[#222] text-gray-400 hover:bg-[#2a2a2a] hover:text-white"
                           }`}
                       >
                         {server.name}
