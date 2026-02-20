@@ -18,7 +18,8 @@ export default function Movies() {
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [minRating, setMinRating] = useState(""); // Added state for Rating
+  const [minRating, setMinRating] = useState(""); 
+  const [selectedRuntime, setSelectedRuntime] = useState(""); // Added state for Runtime
 
   // Initial Load (Genres + First Page)
   useEffect(() => {
@@ -41,7 +42,8 @@ export default function Movies() {
     if (!loading) {
       fetchMovies(1, true);
     }
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating]); // Added minRating dependency
+    // Added selectedRuntime dependency
+  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime]); 
 
   const fetchMovies = async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
@@ -50,7 +52,8 @@ export default function Movies() {
         genre: selectedGenre,
         year: selectedYear,
         language: selectedLanguage,
-        minRating: minRating, // Pass minRating to API
+        minRating: minRating, 
+        runtime: selectedRuntime, // Pass runtime to API
         page: pageNum,
       });
       
@@ -87,8 +90,10 @@ export default function Movies() {
           setSelectedYear={setSelectedYear}
           selectedLanguage={selectedLanguage}
           setSelectedLanguage={setSelectedLanguage}
-          minRating={minRating}       // Pass prop
-          setMinRating={setMinRating} // Pass prop
+          minRating={minRating}
+          setMinRating={setMinRating}
+          selectedRuntime={selectedRuntime}       // Pass new state
+          setSelectedRuntime={setSelectedRuntime} // Pass new setter
         />
 
         {/* MOVIES GRID */}

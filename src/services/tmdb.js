@@ -1,5 +1,5 @@
 const BASE_URL = "/.netlify/functions/tmdb-proxy";
-const API_KEY = "";
+const API_KEY = ""; // Proxy handles the key injection
 
 export async function fetchMovies(endpoint, params = {}) {
   const query = new URLSearchParams(params).toString();
@@ -16,7 +16,7 @@ export async function getPopularMovies() {
   return res.json();
 }
 
-// Get top-rated movies (critically acclaimed)
+// Get top-rated movies
 export async function getTopRatedMovies() {
   const res = await fetch(
     `${BASE_URL}/movie/top_rated?api_key=${API_KEY}&language=en-US&page=1`
@@ -68,7 +68,7 @@ export function getProfileUrl(path, size = "h632") {
   return path ? `${IMAGE_BASE}/${size}${path}` : "https://via.placeholder.com/300x450?text=No+Profile";
 }
 
-// Updated to use the Proxy
+// Get Person Details
 export const getPersonDetails = async (id) => {
   const res = await fetch(
     `${BASE_URL}/person/${id}?api_key=${API_KEY}&append_to_response=combined_credits`
@@ -90,6 +90,7 @@ export async function getPopularTV() {
 
 export async function getTvInfo(id) {
   const res = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits`);
+  if (!res.ok) throw new Error("Failed to fetch TV info");
   return res.json();
 }
 
@@ -108,7 +109,7 @@ export async function getTvGenres() {
 }
 
 // Discover Movies with Filters
-export async function discoverMovies({ genre, year, language, minRating, page = 1 }) {
+export async function discoverMovies({ genre, year, language, minRating, runtime, page = 1 }) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     language: "en-US",
@@ -133,25 +134,32 @@ export async function discoverMovies({ genre, year, language, minRating, page = 
     }
   }
 
+  if (runtime && runtime.includes("-")) {
+    const [min, max] = runtime.split("-");
+    params.append("with_runtime.gte", min);
+    params.append("with_runtime.lte", max);
+  }
+
   const res = await fetch(`${BASE_URL}/discover/movie?${params.toString()}`);
   if (!res.ok) throw new Error("Failed to discover movies");
   return res.json();
 }
 
-// Discover TV Shows with Filters
-export async function discoverTv({ genre, year, language, minRating, page = 1 }) {
+// Discover TV Shows (Updated for Status Filter)
+export async function discoverTv({ genre, year, language, minRating, status, page = 1 }) {
   const params = new URLSearchParams({
     api_key: API_KEY,
     language: "en-US",
     sort_by: "popularity.desc",
     include_adult: "false",
     page: page.toString(),
-    "vote_count.gte": "100"
+    "vote_count.gte": "10" 
   });
 
   if (genre) params.append("with_genres", genre);
   if (year) params.append("first_air_date_year", year);
   if (language) params.append("with_original_language", language);
+  if (status) params.append("with_status", status); // Added Status support
   
   if (minRating) {
     if (minRating.includes("-")) {
