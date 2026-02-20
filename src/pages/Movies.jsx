@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import FilterBar from "../components/FilterBar";
 import { Star, Play, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
+import Footer from "../components/Footer";
 
 export default function Movies() {
   const navigate = useNavigate();
@@ -156,6 +157,10 @@ export default function Movies() {
           </div>
         )}
       </div>
+
+      <Footer />
     </div>
+
+    
   );
 }

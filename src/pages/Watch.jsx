@@ -2,6 +2,7 @@ import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getMovieInfo, getTvInfo } from "../services/tmdb";
 import Navbar from "../components/Navbar";
+import Footer from "../components/Footer";
 import { 
   ArrowLeft, Server, Calendar, Star, Clock, 
   ShieldCheck, Loader2, Users, ThumbsUp, Share2,
@@ -347,7 +348,9 @@ export default function Watch() {
             </div>
           </div>
         </div>
+        <Footer />
       </div>
+      
     </div>
   );
 }

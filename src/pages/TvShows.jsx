@@ -5,6 +5,7 @@ import Navbar from "../components/Navbar";
 import FilterBar from "../components/FilterBar";
 import { Star, Play, Loader2, Tv } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import Footer from "../components/Footer";
 
 export default function TvShows() {
   const navigate = useNavigate();
@@ -171,6 +172,7 @@ export default function TvShows() {
           </div>
         )}
       </div>
+      <Footer />
     </div>
   );
 }
