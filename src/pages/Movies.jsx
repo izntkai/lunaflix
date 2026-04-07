@@ -1,11 +1,9 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { getMovieGenres, discoverMovies } from "../services/tmdb";
-import Navbar from "../components/Navbar";
 import FilterBar from "../components/FilterBar";
 import { Star, Play, Loader2 } from "lucide-react";
 import { motion } from "framer-motion";
-import Footer from "../components/Footer";
 
 export default function Movies() {
   const navigate = useNavigate();
@@ -72,8 +70,7 @@ export default function Movies() {
   };
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-gray-100 font-sans selection:bg-purple-500/30 pb-20">
-      <Navbar />
+    <div className="pb-20">
       
       <div className="pt-24 px-4 md:px-8 max-w-7xl mx-auto">
         {/* Page Title */}
@@ -158,7 +155,6 @@ export default function Movies() {
         )}
       </div>
 
-      <Footer />
     </div>
 
     

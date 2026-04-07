@@ -3,8 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getTrendingAll, getPopularMovies, getTopRatedMovies, getPopularTV } from "../services/tmdb";
 import { Play, Info, ChevronRight, ChevronLeft, Star, Calendar } from "lucide-react";
 import { motion } from "framer-motion";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 
 // --- Sub-Component: Hero Section ---
 const Hero = ({ movie }) => {
@@ -271,8 +269,7 @@ export default function Home() {
   if (loading) return <HomeSkeleton />;
 
   return (
-    <div className="bg-[#141414] min-h-screen text-white overflow-x-hidden selection:bg-purple-600 selection:text-white font-sans">
-      <Navbar />
+    <div className="overflow-x-hidden">
 
       {/* Hero Section */}
       <Hero movie={data.featured} />
@@ -287,7 +284,6 @@ export default function Home() {
         <MovieRow title="Top Rated Movies" movies={data.topRated} type="movie" />
       </div>
 
-      <Footer />
     </div>
   );
 }

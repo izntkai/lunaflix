@@ -88,10 +88,10 @@ export default function Search() {
   };
 
   return (
-    <div className="min-h-screen bg-[#141414] text-white selection:bg-purple-600 selection:text-white pb-20">
+    <div className="pt-16">
       
       {/* --- Sticky Header --- */}
-      <div className="sticky top-0 z-40 bg-[#141414]/95 backdrop-blur-md border-b border-white/5 py-4 px-4 md:px-8">
+      <div className="sticky top-16 z-40 bg-[#0f0f0f]/95 backdrop-blur-md border-b border-white/5 py-4 px-4 md:px-8">
         <div className="max-w-6xl mx-auto flex items-center gap-4">
           <button 
             onClick={() => navigate(-1)} 

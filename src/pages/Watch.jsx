@@ -1,8 +1,6 @@
 import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getMovieInfo, getTvInfo, BASE_URL, API_KEY } from "../services/tmdb";
-import Navbar from "../components/Navbar";
-import Footer from "../components/Footer";
 import {
   ArrowLeft, Server, Calendar, Star, Clock,
   ShieldCheck, Loader2, Users, ThumbsUp, Share2,
@@ -126,15 +124,13 @@ export default function Watch() {
   const releaseDate = movie?.release_date || movie?.first_air_date;
 
   return (
-    <div className={`min-h-screen bg-[#0f0f0f] text-gray-100 font-sans selection:bg-purple-500 pb-12 transition-opacity duration-500 ${canInteract ? "opacity-100" : "opacity-90"}`}>
+    <div className={`transition-opacity duration-500 ${canInteract ? "opacity-100" : "opacity-90"}`}>
       <style>{`
         .custom-cast-scrollbar::-webkit-scrollbar { height: 4px; }
         .custom-cast-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 20px; margin: 0 10px; }
         .custom-cast-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(to right, #9146ff, #6d28d9); border-radius: 20px; }
         .custom-cast-scrollbar::-webkit-scrollbar-thumb:hover { background: #a855f7; }
       `}</style>
-
-      <Navbar />
 
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
         <div className="absolute inset-0 bg-[#0f0f0f]/95 z-10" />
@@ -346,9 +342,7 @@ export default function Watch() {
             </div>
           </div>
         </div>
-        <Footer />
       </div>
-
     </div>
   );
 }
