@@ -1,10 +1,19 @@
-const BASE_URL = "/.netlify/functions/tmdb-proxy";
-const API_KEY = ""; // Proxy handles the key injection
+const IS_DEV = import.meta.env.DEV;
+const VITE_API_KEY = import.meta.env.VITE_TMDB_API_KEY || "";
+
+// If in development and we have an API key, use direct TMDB URL.
+// Otherwise, use the Netlify proxy (which will be handled by netlify dev or production).
+export const BASE_URL = (IS_DEV && VITE_API_KEY) 
+  ? "https://api.themoviedb.org/3" 
+  : "/.netlify/functions/tmdb-proxy";
+
+export const API_KEY = (IS_DEV && VITE_API_KEY) ? VITE_API_KEY : ""; 
+
 
 export async function fetchMovies(endpoint, params = {}) {
   const query = new URLSearchParams(params).toString();
   const res = await fetch(`${BASE_URL}${endpoint}?${query}`);
-  
+
   if (!res.ok) throw new Error("Failed to fetch");
   return res.json();
 }
@@ -80,11 +89,13 @@ export const getPersonDetails = async (id) => {
 // --- TV FUNCTIONS ---
 export async function getTrendingAll() {
   const res = await fetch(`${BASE_URL}/trending/all/week?api_key=${API_KEY}`);
+  if (!res.ok) throw new Error("Failed to fetch trending content");
   return res.json();
 }
 
 export async function getPopularTV() {
   const res = await fetch(`${BASE_URL}/tv/popular?api_key=${API_KEY}&language=en-US&page=1`);
+  if (!res.ok) throw new Error("Failed to fetch popular TV shows");
   return res.json();
 }
 
@@ -117,13 +128,13 @@ export async function discoverMovies({ genre, year, language, minRating, runtime
     include_adult: "false",
     include_video: "false",
     page: page.toString(),
-    "vote_count.gte": "100" 
+    "vote_count.gte": "100"
   });
 
   if (genre) params.append("with_genres", genre);
   if (year) params.append("primary_release_year", year);
   if (language) params.append("with_original_language", language);
-  
+
   if (minRating) {
     if (minRating.includes("-")) {
       const [min, max] = minRating.split("-");
@@ -153,14 +164,14 @@ export async function discoverTv({ genre, year, language, minRating, status, pag
     sort_by: "popularity.desc",
     include_adult: "false",
     page: page.toString(),
-    "vote_count.gte": "10" 
+    "vote_count.gte": "10"
   });
 
   if (genre) params.append("with_genres", genre);
   if (year) params.append("first_air_date_year", year);
   if (language) params.append("with_original_language", language);
   if (status) params.append("with_status", status); // Added Status support
-  
+
   if (minRating) {
     if (minRating.includes("-")) {
       const [min, max] = minRating.split("-");

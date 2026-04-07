@@ -17,7 +17,7 @@ const Hero = ({ movie }) => {
   return (
     <div className="pt-24 pb-6 px-4 md:px-8 max-w-450 mx-auto">
       <div className="relative h-[55vh] md:h-[65vh] w-full rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.6)] group border border-white/5 bg-[#141414]">
-        
+
         {/* Background Image with Slow Zoom */}
         <motion.div
           initial={{ scale: 1 }}
@@ -31,16 +31,16 @@ const Hero = ({ movie }) => {
             className="w-full h-full object-cover opacity-90"
           />
         </motion.div>
-        
+
         {/* Cinematic Gradient Overlays */}
         <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
         <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
 
         {/* Content Container */}
         <div className="absolute bottom-0 top-0 left-0 flex flex-col justify-center px-8 md:px-16 max-w-2xl space-y-5">
-          
+
           {/* Metadata Badges */}
-          <motion.div 
+          <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.1 }}
@@ -53,10 +53,10 @@ const Hero = ({ movie }) => {
               <Star size={12} fill="currentColor" /> {movie.vote_average?.toFixed(1)}
             </span>
             <span className="font-paragraph text-gray-300 flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded">
-               <Calendar size={12} /> {(movie.release_date || movie.first_air_date)?.split("-")[0]}
+              <Calendar size={12} /> {(movie.release_date || movie.first_air_date)?.split("-")[0]}
             </span>
             {mediaType === 'tv' && (
-               <span className="font-paragraph text-gray-300 border border-gray-600 px-2 py-0.5 rounded uppercase">TV Series</span>
+              <span className="font-paragraph text-gray-300 border border-gray-600 px-2 py-0.5 rounded uppercase">TV Series</span>
             )}
           </motion.div>
 
@@ -133,10 +133,10 @@ const MovieCard = ({ movie, type }) => {
 
         {/* Compact Gradient Overlay */}
         <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-          
+
           {/* Action Icon */}
           <div className="absolute top-1/2 left-1/2 -translate-x-1/2 bg-white/20 backdrop-blur-sm p-3 rounded-full opacity-0 group-hover:opacity-100 transform translate-y-4 group-hover:translate-y-0 transition-all duration-300 delay-75 shadow-lg">
-             <Play size={20} fill="white" className="text-white" />
+            <Play size={20} fill="white" className="text-white" />
           </div>
 
           {/* Text Info */}
@@ -144,10 +144,10 @@ const MovieCard = ({ movie, type }) => {
             <h3 className="text-white text-xs md:text-sm font-title truncate mb-1">
               {movie.title || movie.name}
             </h3>
-            
+
             <div className="flex items-center justify-between text-[10px] md:text-xs text-gray-300 font-medium">
               <span className="flex items-center gap-1 text-purple-500">
-                <Star size={10} fill="currentColor" /> 
+                <Star size={10} fill="currentColor" />
                 {movie.vote_average?.toFixed(1)}
               </span>
               <span>{(movie.release_date || movie.first_air_date)?.split("-")[0]}</span>
@@ -179,7 +179,7 @@ const MovieRow = ({ title, movies, type }) => {
 
       <div className="relative">
         {/* Left Paddle */}
-        <button 
+        <button
           onClick={() => scroll(-800)}
           className="absolute left-0 top-0 bottom-0 z-40 bg-black/50 hover:bg-black/70 w-12 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 rounded-l-md pointer-events-none group-hover/row:pointer-events-auto"
         >
@@ -187,7 +187,7 @@ const MovieRow = ({ title, movies, type }) => {
         </button>
 
         {/* Scroll Container */}
-        <div 
+        <div
           ref={rowRef}
           className="flex gap-4 overflow-x-auto pb-6 scrollbar-hide scroll-smooth px-1"
           style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
@@ -198,7 +198,7 @@ const MovieRow = ({ title, movies, type }) => {
         </div>
 
         {/* Right Paddle */}
-        <button 
+        <button
           onClick={() => scroll(800)}
           className="absolute right-0 top-0 bottom-0 z-40 bg-black/50 hover:bg-black/70 w-12 flex items-center justify-center opacity-0 group-hover/row:opacity-100 transition-opacity duration-300 rounded-r-md pointer-events-none group-hover/row:pointer-events-auto"
         >
@@ -241,22 +241,22 @@ export default function Home() {
           getTrendingAll(),
           getPopularMovies(),
           getPopularTV(),
-          getTopRatedMovies(), 
+          getTopRatedMovies(),
         ]);
-        
+
         const trending = trendingRes.results || [];
-        
+
         // Select a random featured item from trending
-        const randomFeatured = trending.length > 0 
+        const randomFeatured = trending.length > 0
           ? trending[Math.floor(Math.random() * 10)] // Top 10 items
           : null;
 
-        setData({ 
-          trending, 
-          popularMovies: popularMoviesRes.results || [], 
+        setData({
+          trending,
+          popularMovies: popularMoviesRes.results || [],
           popularTV: popularTVRes.results || [],
-          topRated: topRatedRes.results || [], 
-          featured: randomFeatured 
+          topRated: topRatedRes.results || [],
+          featured: randomFeatured
         });
       } catch (error) {
         console.error("Fetch error:", error);
@@ -273,14 +273,14 @@ export default function Home() {
   return (
     <div className="bg-[#141414] min-h-screen text-white overflow-x-hidden selection:bg-purple-600 selection:text-white font-sans">
       <Navbar />
-      
+
       {/* Hero Section */}
       <Hero movie={data.featured} />
 
       {/* Content Stack */}
       <div className="relative z-10 -mt-4 md:-mt-1 bg-transparent pb-20">
         <MovieRow title="Trending Now" movies={data.trending} />
-        
+
         {/* Pass implicit types to these rows to ensure correct navigation */}
         <MovieRow title="Popular Movies" movies={data.popularMovies} type="movie" />
         <MovieRow title="Popular TV Shows" movies={data.popularTV} type="tv" />
