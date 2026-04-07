@@ -116,7 +116,7 @@ export default function TvShows() {
                     initial={{ opacity: 0, scale: 0.9 }}
                     animate={{ opacity: 1, scale: 1 }}
                     whileHover={{ scale: 1.05, y: -5 }}
-                    onClick={() => navigate(`/watch/tv/${show.id}`)}
+                    onClick={() => navigate(`/details/tv/${show.id}`)}
                     className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
                   >
                     <img

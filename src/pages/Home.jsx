@@ -86,7 +86,7 @@ const Hero = ({ movie }) => {
             className="flex items-center gap-4 pt-2"
           >
             <button
-              onClick={() => navigate(`/watch/${mediaType}/${movie.id}`)}
+              onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
               className="font-title flex items-center gap-2 bg-purple-500 text-black px-6 py-3 rounded-xl hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-sm md:text-base shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               <Play size={20} fill="currentColor" /> Watch Now
@@ -119,7 +119,7 @@ const MovieCard = ({ movie, type }) => {
       whileInView={{ opacity: 1 }}
       viewport={{ once: true }}
       className="relative flex-none w-32 md:w-40 lg:w-48 aspect-[2/3] cursor-pointer group"
-      onClick={() => navigate(`/watch/${mediaType}/${movie.id}`)}
+      onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
     >
       <div className="w-full h-full rounded-xl overflow-hidden relative shadow-lg bg-[#202020] ring-1 ring-white/10 group-hover:ring-purple-500/50 transition-all duration-300">
         <img

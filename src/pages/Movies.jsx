@@ -108,7 +108,7 @@ export default function Movies() {
                 animate={{ opacity: 1, scale: 1 }}
                 whileHover={{ scale: 1.05, y: -5 }}
                 transition={{ duration: 0.2 }}
-                onClick={() => navigate(`/watch/movie/${movie.id}`)}
+                onClick={() => navigate(`/details/movie/${movie.id}`)}
                 className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
               >
                 <img

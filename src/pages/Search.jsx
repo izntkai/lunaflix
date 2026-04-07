@@ -14,7 +14,7 @@ const SearchCard = ({ item }) => {
 
   return (
     <Link 
-      to={`/watch/${type}/${item.id}`} 
+      to={`/details/${type}/${item.id}`} 
       className="group relative block w-full aspect-[2/3] bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300"
     >
       {item.poster_path ? (
