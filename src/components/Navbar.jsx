@@ -1,7 +1,9 @@
 import { useState, useEffect } from "react";
 import { Link, useLocation, useNavigate } from "react-router-dom";
-import { Search, Menu, X, Home, Film, Tv } from "lucide-react";
+import { Search, Menu, X } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { NavLink } from "./NavLink";
+import { MobileMenu } from "./MobileMenu";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -29,27 +31,6 @@ export default function Navbar() {
       setIsSearchOpen(false);
       setIsMobileMenuOpen(false);
     }
-  };
-
-  // Helper for Active Link Styling
-  const NavLink = ({ to, icon: Icon, label }) => {
-    const isActive = location.pathname === to;
-    return (
-      <Link 
-        to={to} 
-        className={`relative flex items-center gap-2 text-sm font-medium transition-colors duration-300 group
-          ${isActive ? "text-purple-400" : "text-gray-300 hover:text-white"}`}
-      >
-        {Icon && <Icon size={16} className="mb-0.5" />}
-        {label}
-        {isActive && (
-          <motion.div 
-            layoutId="navbar-indicator"
-            className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-          />
-        )}
-      </Link>
-    );
   };
 
   return (
@@ -128,51 +109,13 @@ export default function Navbar() {
 
       {/* 4. MOBILE MENU OVERLAY */}
       <AnimatePresence>
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ opacity: 0, y: -20 }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: -20 }}
-            className="fixed inset-0 z-40 bg-[#0f0f0f] pt-24 px-6 md:hidden flex flex-col gap-6"
-          >
-            {/* Mobile Search (VISIBLE ONLY ON MOBILE MENU) */}
-            <form onSubmit={handleSearch} className="relative">
-              <Search className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-400" size={18} />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                value={query}
-                onChange={(e) => setQuery(e.target.value)}
-                className="w-full bg-[#1a1a1a] border border-white/10 rounded-xl py-3 pl-12 pr-4 text-white focus:border-purple-500 outline-none"
-              />
-            </form>
-
-            {/* Mobile Links */}
-            <div className="flex flex-col gap-2">
-              <Link 
-                to="/" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-              >
-                <Home size={20} /> <span className="text-lg font-medium">Home</span>
-              </Link>
-              <Link 
-                to="/movies" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/movies' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-              >
-                <Film size={20} /> <span className="text-lg font-medium">Movies</span>
-              </Link>
-              <Link 
-                to="/series" 
-                onClick={() => setIsMobileMenuOpen(false)}
-                className={`flex items-center gap-4 p-4 rounded-xl transition-colors ${location.pathname === '/tv' ? 'bg-purple-600/10 text-purple-400 border border-purple-500/20' : 'text-gray-400 hover:bg-white/5 hover:text-white'}`}
-              >
-                <Tv size={20} /> <span className="text-lg font-medium">Series</span>
-              </Link>
-            </div>
-          </motion.div>
-        )}
+        <MobileMenu 
+          isMobileMenuOpen={isMobileMenuOpen} 
+          setIsMobileMenuOpen={setIsMobileMenuOpen} 
+          query={query} 
+          setQuery={setQuery} 
+          handleSearch={handleSearch} 
+        />
       </AnimatePresence>
     </>
   );

@@ -1,118 +1,18 @@
-import { useParams, useNavigate, Link, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
-import { getMovieInfo, getTvInfo, BASE_URL, API_KEY } from "../services/tmdb";
-import {
-  ArrowLeft, Server, Calendar, Star, Clock,
-  ShieldCheck, Loader2, Users, ThumbsUp, Share2,
-  ChevronDown, Layers, ChevronRight, Play
-} from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
-
-const servers = [
-  { name: "Vidsrc CC", url: (id, type, s, e) => `https://vidsrc.cc/v2/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
-  { name: "VidSrc Pro", url: (id, type, s, e) => `https://vidsrc.me/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
-  { name: "VidFast", url: (id, type, s, e) => `https://vidfast.pro/${type}/${id}${type === 'tv' ? `?s=${s}&e=${e}` : ''}` },
-  { name: "VidLink", url: (id, type, s, e) => `https://vidlink.pro/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
-  { name: "VidKing", url: (id, type, s, e) => `https://www.vidking.net/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}?color=9146ff` },
-  { name: "SuperEmbed", url: (id, type, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1${type === 'tv' ? `&s=${s}&e=${e}` : ''}` },
-  { name: "Smashy", url: (id, type, s, e) => `https://player.smashy.stream/${type}/${id}${type === 'tv' ? `?s=${s}&e=${e}` : ''}` },
-];
+import { useNavigate } from "react-router-dom";
+import { useWatch } from "../hooks/useWatch";
+import { servers } from "../constants/servers";
+import { CrewCard, CastScroll, DesktopSidebar, WatchHeader, MobileControls, DetailSection } from "../components/WatchComponents";
+import { Loader2 } from "lucide-react";
+import { motion } from "framer-motion";
 
 export default function Watch() {
-  const { id } = useParams();
   const navigate = useNavigate();
-  const location = useLocation();
-
-  const isTv = location.pathname.includes("/tv/");
-  const mediaType = isTv ? "tv" : "movie";
-
-  const [currentServer, setCurrentServer] = useState(servers[0]);
-  const [movie, setMovie] = useState(null);
-  const [loading, setLoading] = useState(true);
-  const [iframeLoading, setIframeLoading] = useState(true);
-  const [canInteract, setCanInteract] = useState(false);
-
-  const [season, setSeason] = useState(1);
-  const [episode, setEpisode] = useState(1);
-  const [episodeDetails, setEpisodeDetails] = useState(null);
-
-  useEffect(() => {
-    window.scrollTo(0, 0);
-    const fetchFunc = isTv ? getTvInfo : getMovieInfo;
-
-    fetchFunc(id).then((data) => {
-      setMovie(data);
-      setLoading(false);
-    });
-
-    const timer = setTimeout(() => setCanInteract(true), 800);
-    return () => clearTimeout(timer);
-  }, [id, isTv]);
-
-  useEffect(() => {
-    if (isTv) {
-      fetch(`${BASE_URL}/tv/${id}/season/${season}/episode/${episode}?api_key=${API_KEY}&append_to_response=credits`)
-        .then(res => res.json())
-        .then(data => setEpisodeDetails(data))
-        .catch(err => console.error("Error fetching episode details:", err));
-    }
-    setIframeLoading(true);
-  }, [id, season, episode, isTv]);
-
-  const getCrewMember = (job) => movie?.credits?.crew?.find(c => c.job === job);
-  const getWriter = () => movie?.credits?.crew?.find(c => ["Screenplay", "Writer", "Story"].includes(c.job));
-  const getEpisodeDirector = () => episodeDetails?.crew?.find(c => c.job === "Director");
-
-  const currentSeasonData = movie?.seasons?.find(s => s.season_number === Number(season));
-  const totalEpisodesInSeason = currentSeasonData?.episode_count || 0;
-  const episodeList = Array.from({ length: totalEpisodesInSeason }, (_, i) => i + 1);
-
-  const hasNextEpisode = () => {
-    if (!isTv || !movie) return false;
-    const isLastEpisodeOfSeason = Number(episode) >= totalEpisodesInSeason;
-    const isLastSeason = Number(season) >= movie.number_of_seasons;
-    return !(isLastEpisodeOfSeason && isLastSeason);
-  };
-
-  const handleNextEpisode = () => {
-    if (Number(episode) < totalEpisodesInSeason) {
-      setEpisode(prev => Number(prev) + 1);
-    } else if (Number(season) < movie.number_of_seasons) {
-      setSeason(prev => Number(prev) + 1);
-      setEpisode(1);
-    }
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const getDisplayCast = () => {
-    if (isTv && episodeDetails) {
-      const regulars = episodeDetails.credits?.cast || [];
-      const guests = episodeDetails.guest_stars || [];
-      const combined = [...regulars, ...guests];
-      const uniqueCast = Array.from(new Map(combined.map(item => [item.id, item])).values());
-      return uniqueCast.slice(0, 25);
-    }
-    return movie?.credits?.cast?.slice(0, 20) || [];
-  };
-
-  const CrewCard = ({ label, person }) => (
-    <div className={`flex items-center gap-3 group transition-transform hover:scale-105 ${!person && 'opacity-50'}`}>
-      <Link
-        to={person ? `/person/${person.id}` : "#"}
-        className={`w-10 h-10 rounded-full overflow-hidden border border-white/10 bg-gray-800 shrink-0 group-hover:border-purple-500/50 transition-colors ${!person && 'pointer-events-none'}`}
-      >
-        {person?.profile_path ? (
-          <img src={`https://image.tmdb.org/t/p/w200${person.profile_path}`} alt={person.name} className="w-full h-full object-cover" />
-        ) : (
-          <div className="w-full h-full flex items-center justify-center text-[8px] text-gray-500 uppercase font-bold">N/A</div>
-        )}
-      </Link>
-      <div>
-        <span className="block text-[10px] text-gray-500 uppercase font-bold tracking-wider leading-none mb-1 group-hover:text-purple-400 transition-colors">{label}</span>
-        <p className="text-xs text-white font-medium truncate max-w-[120px]">{person?.name || "Unknown"}</p>
-      </div>
-    </div>
-  );
+  const {
+    id, isTv, mediaType, currentServer, setCurrentServer,
+    movie, loading, iframeLoading, setIframeLoading,
+    canInteract, season, setSeason, episode, setEpisode,
+    episodeDetails, totalEpisodesInSeason, handleNextEpisode
+  } = useWatch();
 
   if (loading) return (
     <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
@@ -120,16 +20,14 @@ export default function Watch() {
     </div>
   );
 
-  const title = movie?.title || movie?.name;
-  const releaseDate = movie?.release_date || movie?.first_air_date;
+  const episodeList = Array.from({ length: totalEpisodesInSeason }, (_, i) => i + 1);
 
   return (
-    <div className={`transition-opacity duration-500 ${canInteract ? "opacity-100" : "opacity-90"}`}>
+    <div className={`transition-opacity duration-500 ${canInteract ? "opacity-100" : "opacity-90"} pb-20`}>
       <style>{`
         .custom-cast-scrollbar::-webkit-scrollbar { height: 4px; }
-        .custom-cast-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 20px; margin: 0 10px; }
+        .custom-cast-scrollbar::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.02); border-radius: 20px; }
         .custom-cast-scrollbar::-webkit-scrollbar-thumb { background: linear-gradient(to right, #9146ff, #6d28d9); border-radius: 20px; }
-        .custom-cast-scrollbar::-webkit-scrollbar-thumb:hover { background: #a855f7; }
       `}</style>
 
       <div className="fixed inset-0 z-0 overflow-hidden pointer-events-none">
@@ -137,26 +35,14 @@ export default function Watch() {
         <img src={`https://image.tmdb.org/t/p/original${movie?.backdrop_path}`} alt="bg" className="w-full h-full object-cover blur-3xl opacity-20" />
       </div>
 
-      <div className="relative z-10 max-w-5xl mx-auto pt-24 px-4 py-4">
-        <div className="flex items-center justify-between mb-4">
-          <button onClick={() => navigate(-1)} className="flex items-center gap-2 px-3 py-1.5 rounded-lg bg-white/5 hover:bg-white/10 transition group text-sm border border-white/5 cursor-pointer">
-            <ArrowLeft size={16} className="group-hover:-translate-x-1 transition-transform" />
-            <span className="font-medium">Back</span>
-          </button>
-
-          {hasNextEpisode() && (
-            <button onClick={handleNextEpisode} className="flex items-center gap-2 px-4 py-1.5 rounded-lg bg-purple-600 hover:bg-purple-500 transition text-sm font-bold shadow-lg shadow-purple-600/20 cursor-pointer">
-              <span>Next Episode</span>
-              <ChevronRight size={16} />
-            </button>
-          )}
-        </div>
+      <div className="relative z-10 max-w-5xl mx-auto px-4 py-4">
+        <WatchHeader navigate={navigate} isTv={isTv} movie={movie} episode={episode} season={season} totalEpisodesInSeason={totalEpisodesInSeason} handleNextEpisode={handleNextEpisode} />
 
         <motion.div className="w-full aspect-video bg-black rounded-lg overflow-hidden shadow-lg border border-white/10 relative">
           {iframeLoading && (
-            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-10">
+            <div className="absolute inset-0 flex flex-col items-center justify-center bg-[#0a0a0a] z-10 font-bold">
               <Loader2 className="animate-spin text-purple-500 w-8 h-8 mb-2" />
-              <p className="text-gray-500 text-xs animate-pulse">Loading secure stream...</p>
+              <p className="text-gray-500 text-xs animate-pulse uppercase text-center px-4">Loading secure stream...</p>
             </div>
           )}
           <iframe
@@ -169,86 +55,18 @@ export default function Watch() {
           />
         </motion.div>
 
-        {/* MOBILE ONLY CONTROLS */}
-        <div className="lg:hidden mt-4 space-y-3">
-          {isTv && (
-            <div className="grid grid-cols-2 gap-2">
-              <div className="relative">
-                <select
-                  value={season}
-                  onChange={(e) => { setSeason(e.target.value); setEpisode(1); }}
-                  className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none"
-                >
-                  {movie?.seasons?.filter(s => s.season_number > 0).map(s => (
-                    <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
-              </div>
-              <div className="relative">
-                <select
-                  value={episode}
-                  onChange={(e) => setEpisode(e.target.value)}
-                  className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none"
-                >
-                  {episodeList.map(ep => (
-                    <option key={ep} value={ep}>Episode {ep}</option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
-              </div>
-            </div>
-          )}
-          <div className="relative">
-            <select
-              value={currentServer.name}
-              onChange={(e) => setCurrentServer(servers.find(s => s.name === e.target.value))}
-              className="w-full bg-purple-600/20 text-purple-300 text-sm py-3 px-4 rounded-xl border border-purple-500/30 outline-none appearance-none font-bold"
-            >
-              {servers.map((server) => (
-                <option key={server.name} value={server.name} className="bg-[#161616] text-white">Server: {server.name}</option>
-              ))}
-            </select>
-            <Server className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-400 pointer-events-none" size={16} />
-          </div>
-        </div>
+        <MobileControls isTv={isTv} movie={movie} season={season} setSeason={setSeason} setEpisode={setEpisode} episode={episode} episodeList={episodeList} currentServer={currentServer} setCurrentServer={setCurrentServer} servers={servers} />
 
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
-          <div className="lg:col-span-2 space-y-4">
-            <div>
-              <h1 className="text-2xl md:text-3xl font-bold font-title text-white mb-2 tracking-tight">
-                {title} {isTv && <span className="text-purple-500/80 text-lg md:text-xl font-medium ml-2">S{season} E{episode}</span>}
-              </h1>
-              {/* ... Rest of Metadata & Overview ... */}
-              <div className="font-paragraph flex flex-wrap items-center gap-3 text-xs md:text-sm text-gray-400 mb-6">
-                <span className="flex items-center gap-1 text-yellow-400 font-semibold">
-                  <Star size={14} fill="currentColor" /> {movie?.vote_average?.toFixed(1)}
-                </span>
-                <span className="flex items-center gap-1"><Calendar size={14} /> {releaseDate?.split("-")[0]}</span>
-                {movie?.runtime && <span className="flex items-center gap-1"><Clock size={14} /> {movie?.runtime}m</span>}
-                {isTv && <span className="px-1.5 py-0.5 rounded border border-purple-500/50 text-purple-300 text-[10px] uppercase font-bold">{movie?.number_of_seasons} Seasons</span>}
-                <span className="px-1.5 py-0.5 rounded border border-gray-700 text-[10px] uppercase font-bold">HD</span>
-              </div>
-
-              {isTv && episodeDetails && (
-                <div className="bg-white/5 border border-white/5 p-5 rounded-2xl mb-6 relative group overflow-hidden">
-                  <h3 className="text-purple-400 text-[10px] uppercase font-bold tracking-[0.2em] mb-2">Episode Details</h3>
-                  <h4 className="text-white text-lg font-bold mb-2">{episodeDetails.name}</h4>
-                  <p className="font-paragraph text-gray-300 leading-relaxed text-sm">
-                    {episodeDetails.overview || "No overview available for this episode."}
-                  </p>
-                </div>
-              )}
-              <p className="font-paragraph text-gray-400 leading-relaxed text-sm line-clamp-3">{movie?.overview}</p>
-            </div>
-
-            <div className="font-title grid grid-cols-2 md:grid-cols-4 gap-6 py-6 border-y border-white/5">
-              {isTv ? (
-                <CrewCard label="Episode Director" person={getEpisodeDirector() || getCrewMember("Director")} />
-              ) : (
-                <CrewCard label="Director" person={getCrewMember("Director")} />
-              )}
-              <CrewCard label="Writer" person={getWriter()} />
+          <div className="lg:col-span-2 space-y-4 text-white">
+            <DetailSection isTv={isTv} movie={movie} season={season} episode={episode} episodeDetails={episodeDetails} />
+          </div>
+          <DesktopSidebar isTv={isTv} movie={movie} season={season} setSeason={setSeason} episode={episode} setEpisode={setEpisode} episodeList={episodeList} servers={servers} currentServer={currentServer} setCurrentServer={setCurrentServer} />
+        </div>
+      </div>
+    </div>
+  );
+}
               <CrewCard label="Cinematography" person={getCrewMember("Director of Photography")} />
               <CrewCard label="Producer" person={getCrewMember("Executive Producer")} />
             </div>

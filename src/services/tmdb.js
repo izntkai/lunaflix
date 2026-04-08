@@ -194,3 +194,24 @@ export async function searchMulti(query) {
   if (!res.ok) throw new Error("Failed to search");
   return res.json();
 }
+
+// Get videos for a movie or TV show
+export async function getVideos(type, id) {
+  const res = await fetch(`${BASE_URL}/${type}/${id}/videos?api_key=${API_KEY}&language=en-US`);
+  if (!res.ok) throw new Error(`Failed to fetch ${type} videos`);
+  return res.json();
+}
+
+// Get recommendations for a movie or TV show
+export async function getRecommendations(type, id) {
+  const res = await fetch(`${BASE_URL}/${type}/${id}/recommendations?api_key=${API_KEY}&language=en-US&page=1`);
+  if (!res.ok) throw new Error(`Failed to fetch ${type} recommendations`);
+  return res.json();
+}
+
+// Get detailed info for a specific TV episode
+export async function getEpisodeInfo(id, season, episode) {
+  const res = await fetch(`${BASE_URL}/tv/${id}/season/${season}/episode/${episode}?api_key=${API_KEY}&append_to_response=credits`);
+  if (!res.ok) throw new Error("Failed to fetch episode info");
+  return res.json();
+}

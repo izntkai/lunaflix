@@ -72,7 +72,7 @@ export default function Movies() {
   return (
     <div className="pb-20">
       
-      <div className="pt-24 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 max-w-7xl mx-auto">
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-8 bg-purple-500 rounded-full" />

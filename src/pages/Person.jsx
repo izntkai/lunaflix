@@ -44,7 +44,7 @@ export default function Person() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(145, 70, 255, 0.3); border-radius: 10px; }
       `}</style>
-    <div className="pt-20 px-4 pb-8 max-w-5xl mx-auto">
+    <div className="px-4 pb-8 max-w-5xl mx-auto">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-4 text-xs text-gray-500 hover:text-white transition group cursor-pointer">
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back
         </button>
