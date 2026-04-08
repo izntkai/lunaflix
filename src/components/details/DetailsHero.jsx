@@ -206,7 +206,7 @@ export function DetailsHero({ movie, trailer, type, id }) {
             <div className="flex flex-wrap gap-3 pt-2">
               <button
                 onClick={() => navigate(`/watch/${type}/${id}`)}
-                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-black font-black px-7 py-3 rounded-2xl transition-all"
+                className="flex items-center gap-2 bg-purple-600 hover:bg-purple-500 text-black font-black px-7 py-3 rounded-2xl transition-all duration-300 hover:scale-105 hover:shadow-[0_0_22px_rgba(147,51,234,0.45)]"
               >
                 <Play fill="currentColor" size={18} />
                 WATCH NOW
