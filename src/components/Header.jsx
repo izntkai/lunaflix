@@ -1,12 +1,12 @@
 import { useEffect, useState } from "react";
 
 export default function Header({ trendingMovies }) {
-  if (!trendingMovies || trendingMovies.length === 0) return null;
-
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true); // for fade animation
 
   useEffect(() => {
+    if (!trendingMovies || trendingMovies.length === 0) return;
+
     const interval = setInterval(() => {
       setFade(false); // start fade out
       setTimeout(() => {
@@ -16,6 +16,8 @@ export default function Header({ trendingMovies }) {
     }, 6000); // change movie every 6 seconds
     return () => clearInterval(interval);
   }, [trendingMovies]);
+
+  if (!trendingMovies || trendingMovies.length === 0) return null;
 
   const movie = trendingMovies[currentIndex];
   if (!movie) return null;

@@ -1,6 +1,6 @@
 import { useRef } from "react";
 import { ChevronRight, ChevronLeft } from "lucide-react";
-import { MovieCard } from "../MovieCard";
+import MovieCard from "../MovieCard";
 
 export function MovieRow({ title, movies, type }) {
   const rowRef = useRef(null);

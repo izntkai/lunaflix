@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
-import { Link, useLocation, useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { Search, Menu, X } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
 
@@ -12,8 +12,6 @@ export default function Navbar() {
   const [query, setQuery] = useState("");
   
   const navigate = useNavigate();
-  const location = useLocation();
-
   // Handle Scroll Effect
   useEffect(() => {
     const handleScroll = () => {
@@ -65,11 +63,7 @@ export default function Navbar() {
             <form onSubmit={handleSearch} className="relative hidden md:flex items-center">
               <AnimatePresence>
                 {isSearchOpen && (
-                  <motion.input
-                    initial={{ width: 0, opacity: 0 }}
-                    animate={{ width: 200, opacity: 1 }}
-                    exit={{ width: 0, opacity: 0 }}
-                    transition={{ duration: 0.3 }}
+                  <input
                     type="text"
                     placeholder="What to watch?"
                     value={query}

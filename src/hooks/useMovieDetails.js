@@ -1,6 +1,6 @@
 import { useState, useEffect } from "react";
 import { useParams } from "react-router-dom";
-import { getMovieDetails, getTVDetails, getVideos, getRecommendations } from "../services/tmdb";
+import { getMovieInfo, getTvInfo, getVideos, getRecommendations } from "../services/tmdb";
 
 export function useMovieDetails() {
   const { type, id } = useParams();
@@ -11,7 +11,7 @@ export function useMovieDetails() {
     const fetchDetails = async () => {
       setLoading(true);
       try {
-        const fetchFn = type === "movie" ? getMovieDetails : getTVDetails;
+        const fetchFn = type === "movie" ? getMovieInfo : getTvInfo;
         const [movieRes, videoRes, recommendRes] = await Promise.all([
           fetchFn(id),
           getVideos(type, id),

@@ -35,7 +35,6 @@ export function useWatch() {
         .then(data => setEpisodeDetails(data))
         .catch(err => console.error(err));
     }
-    setIframeLoading(true);
   }, [id, season, episode, isTv]);
 
   const currentSeasonData = movie?.seasons?.find(s => s.season_number === Number(season));

@@ -1,7 +1,7 @@
 import { Play, Info, Share2, Plus } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 
-export function DetailsActions({ type, id, movie }) {
+export function DetailsActions({ type, id }) {
   const navigate = useNavigate();
   return (
     <div className="flex flex-wrap items-center gap-4 py-8">

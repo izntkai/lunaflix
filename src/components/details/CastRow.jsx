@@ -1,4 +1,3 @@
-import { motion } from "framer-motion";
 import { Link } from "react-router-dom";
 import { getProfileUrl } from "../../services/tmdb";
 import { ChevronLeft, ChevronRight } from "lucide-react";
@@ -15,10 +14,8 @@ export function CastRow({ cast, castRef, scrollCast }) {
         <ChevronLeft size={24} />
       </button>
 
-      <motion.div
+      <div
         ref={castRef}
-        initial={{ opacity: 0, x: 20 }}
-        animate={{ opacity: 1, x: 0 }}
         className="flex gap-6 overflow-x-auto pb-8 scrollbar-hide scroll-smooth snap-x snap-mandatory px-1"
         style={{ scrollbarWidth: 'none', msOverflowStyle: 'none' }}
       >
@@ -37,7 +34,7 @@ export function CastRow({ cast, castRef, scrollCast }) {
             </div>
           </Link>
         ))}
-      </motion.div>
+      </div>
 
       <button
         onClick={() => scrollCast('right')}

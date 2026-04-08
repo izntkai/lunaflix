@@ -1,5 +1,4 @@
 import { Link, useLocation } from "react-router-dom";
-import { motion } from "framer-motion";
 
 export function NavLink({ to, icon: Icon, label }) {
   const location = useLocation();
@@ -13,12 +12,7 @@ export function NavLink({ to, icon: Icon, label }) {
     >
       {Icon && <Icon size={16} className="mb-0.5" />}
       {label}
-      {isActive && (
-        <motion.div 
-          layoutId="navbar-indicator"
-          className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]"
-        />
-      )}
+      {isActive && <div className="absolute -bottom-1.5 left-0 right-0 h-0.5 bg-purple-500 rounded-full shadow-[0_0_8px_rgba(168,85,247,0.8)]" />}
     </Link>
   );
 }

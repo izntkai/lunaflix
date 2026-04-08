@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import { getTvGenres, discoverTv } from "../services/tmdb";
 import FilterBar from "../components/FilterBar";
 import { Star, Play, Loader2, Tv } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 export default function TvShows() {
   const navigate = useNavigate();
@@ -102,20 +102,11 @@ export default function TvShows() {
           </div>
         ) : (
           <AnimatePresence mode="wait">
-            <motion.div 
-              key={selectedStatus + selectedGenre + selectedYear}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4"
-            >
+            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {shows.length > 0 ? (
                 shows.map((show) => (
-                  <motion.div
+                <div
                     key={show.id}
-                    layout
-                    initial={{ opacity: 0, scale: 0.9 }}
-                    animate={{ opacity: 1, scale: 1 }}
-                    whileHover={{ scale: 1.05, y: -5 }}
                     onClick={() => navigate(`/details/tv/${show.id}`)}
                     className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
                   >
@@ -139,7 +130,7 @@ export default function TvShows() {
                         <span>{show.first_air_date?.split("-")[0] || "N/A"}</span>
                       </div>
                     </div>
-                  </motion.div>
+                  </div>
                 ))
               ) : (
                 <div className="col-span-full h-60 flex flex-col items-center justify-center text-gray-500">
@@ -148,7 +139,7 @@ export default function TvShows() {
                   <p className="text-sm">Try adjusting your status or genre selection.</p>
                 </div>
               )}
-            </motion.div>
+              </div>
           </AnimatePresence>
         )}
 
