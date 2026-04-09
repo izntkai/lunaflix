@@ -45,12 +45,13 @@ export function Hero({ movie }) {
 
           <div className="flex items-center gap-4 pt-2">
             <button
-              onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
+              onClick={() => navigate(`/watch/${mediaType}/${movie.id}`)}
               className="font-title flex items-center gap-2 bg-purple-500 text-black px-6 py-3 rounded-xl hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-sm md:text-base shadow-[0_0_20px_rgba(255,255,255,0.3)]"
             >
               <Play size={20} fill="currentColor" /> Watch Now
             </button>
             <button
+              onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
               className="font-title flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl hover:bg-white/20 transition-all duration-300 font-semibold text-sm md:text-base"
             >
               <Info size={20} /> Details

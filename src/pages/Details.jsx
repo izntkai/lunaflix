@@ -26,7 +26,7 @@ export default function Details() {
   if (!movie) return null;
 
   return (
-    <div className="min-h-screen bg-[#0f0f0f] text-white selection:bg-purple-600/50 px-4 md:px-20">
+    <div className="mt-4 min-h-screen bg-[#0f0f0f] text-white selection:bg-purple-600/50">
       <DetailsHero
         movie={movie}
         trailer={trailer}
@@ -34,7 +34,7 @@ export default function Details() {
         id={id}
       />
 
-      <div className="max-w-6xl mx-auto w-full px-0 py-10">
+      <div className="max-w-7xl mx-auto w-full px-6 md:px-12 py-10">
         <div className="flex font-title gap-8 mb-8 border-b border-white/5 pb-1">
           {['overview', 'cast', 'videos'].map((tab) => (
             <button key={tab} onClick={() => setActiveTab(tab)} className={`relative pb-3 text-sm font-black uppercase tracking-widest transition-all ${activeTab === tab ? 'text-white' : 'text-white/40 hover:text-white'}`}>

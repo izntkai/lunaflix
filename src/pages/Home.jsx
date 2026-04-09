@@ -43,7 +43,7 @@ export default function Home() {
   if (loading) return <HomeSkeleton />;
 
   return (
-    <div className="overflow-x-hidden">
+    <div className="overflow-x-hidden mt-8">
       <Hero movie={data.featured} />
       <div className="relative z-10 -mt-4 md:-mt-1 bg-transparent pb-20">
         <MovieRow title="Trending Now" movies={data.trending} />

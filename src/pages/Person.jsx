@@ -3,13 +3,14 @@ import { useState, useEffect } from "react";
 import { getPersonDetails } from "../services/tmdb";
 import { ArrowLeft, Loader2, Film, MapPin, Calendar, Tv } from "lucide-react";
 import { AnimatePresence } from "framer-motion";
+import { usePersonCredits } from "../hooks/usePersonCredits";
+import { PersonCredits } from "../components/PersonCredits";
 
 export default function Person() {
   const { id } = useParams();
   const navigate = useNavigate();
   const [person, setPerson] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [activeTab, setActiveTab] = useState("movie");
 
   useEffect(() => {
     window.scrollTo(0, 0);
@@ -25,17 +26,7 @@ export default function Person() {
     </div>
   );
 
-  const cast = person?.combined_credits?.cast || [];
-  
-  const movies = cast
-    .filter(item => item.media_type === "movie" && item.poster_path)
-    .sort((a, b) => b.popularity - a.popularity);
-
-  const shows = cast
-    .filter(item => item.media_type === "tv" && item.poster_path)
-    .sort((a, b) => b.popularity - a.popularity);
-
-  const displayCredits = activeTab === "movie" ? movies : shows;
+  const credits = usePersonCredits(person);
 
   return (
     <div>
@@ -94,66 +85,7 @@ export default function Person() {
               </div>
             </header>
 
-            <section>
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-6 border-b border-white/5">
-                <h2 className="text-sm font-title font-bold flex items-center gap-2 uppercase tracking-wider text-gray-400">
-                  <Film className="text-purple-500" size={16} /> Filmography
-                </h2>
-                
-                <div className="flex font-title bg-white/5 p-1 rounded-lg mb-2 relative">
-                  {["movie", "tv"].map((tab) => (
-                    <button 
-                      key={tab}
-                      onClick={() => setActiveTab(tab)}
-                      className={`relative flex items-center gap-2 px-4 py-1.5 rounded-md text-[10px] font-bold transition-colors z-10 ${activeTab === tab ? 'text-white' : 'text-gray-400 hover:text-white'}`}
-                    >
-                      {tab === "movie" ? <Film size={12} /> : <Tv size={12} />}
-                      {tab === "movie" ? "MOVIES" : "TV SHOWS"} ({tab === "movie" ? movies.length : shows.length})
-                      
-                      {activeTab === tab && <div className="absolute inset-0 bg-purple-600 rounded-md -z-10" />}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {/* Animated Grid Container */}
-              <AnimatePresence mode="wait">
-                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
-                  {displayCredits.length > 0 ? (
-                    displayCredits.slice(0, 30).map((media) => (
-                      <Link 
-                        key={`${media.media_type}-${media.id}`} 
-                        to={`/watch/${media.media_type}/${media.id}`}
-                        className="group flex flex-col gap-2"
-                      >
-                        <div className="aspect-2/3 relative overflow-hidden rounded-lg border border-white/5 group-hover:border-purple-500 transition-colors">
-                          <img 
-                            src={`https://image.tmdb.org/t/p/w200${media.poster_path}`}
-                            alt={media.title || media.name}
-                            className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                            loading="lazy"
-                          />
-                          <div className="absolute top-1 right-1 bg-black/60 backdrop-blur-md px-1.5 py-0.5 rounded text-[8px] font-bold border border-white/10">
-                             {media.vote_average?.toFixed(1)}
-                          </div>
-                        </div>
-                        <div className="px-1">
-                          <p className="text-[12px] font-title font-semibold truncate text-white leading-tight">{media.title || media.name}</p>
-                          <p className="text-[10px] font-paragraph text-gray-500 truncate leading-tight">{media.character || "Cast"}</p>
-                          <p className="text-[9px] font-paragraph text-purple-500/80 mt-0.5">
-                            {activeTab === 'movie' ? (media.release_date?.split('-')[0]) : (media.first_air_date?.split('-')[0])}
-                          </p>
-                        </div>
-                      </Link>
-                    ))
-                  ) : (
-                    <div className="col-span-full py-20 text-center bg-white/5 rounded-2xl border border-dashed border-white/10">
-                       <p className="text-gray-500 text-xs">No {activeTab === 'movie' ? 'movies' : 'TV shows'} found in our records.</p>
-                    </div>
-                  )}
-                </div>
-              </AnimatePresence>
-            </section>
+            <PersonCredits credits={credits} />
           </div>
         </div>
       </div>
