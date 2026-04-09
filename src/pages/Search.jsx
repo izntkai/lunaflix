@@ -1,8 +1,7 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
-import { searchMulti } from "../services/tmdb"; // Updated import
+import { searchMulti } from "../services/tmdb";
 import { Search as SearchIcon, Film, Star, ArrowLeft, Loader2, Tv } from "lucide-react";
-import { motion } from "framer-motion";
 
 // --- Sub-Component: Compact Search Card ---
 const SearchCard = ({ item }) => {
@@ -55,14 +54,8 @@ export default function Search() {
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(query || "");
 
-  // Update local state if URL param changes
-  useEffect(() => {
-    if (query) setSearchTerm(query);
-  }, [query]);
-
   // Fetch results
   useEffect(() => {
-    setLoading(true);
     const delayDebounce = setTimeout(() => {
       if (query) {
         searchMulti(query).then((data) => {
@@ -136,16 +129,11 @@ export default function Search() {
             <p className="text-gray-500 font-paragraph text-sm mt-1">Try checking your spelling or search for another title.</p>
           </div>
         ) : (
-          <motion.div 
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.3 }}
-            className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4"
-          >
+          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
             {results.map((item) => (
               <SearchCard key={item.id} item={item} />
             ))}
-          </motion.div>
+          </div>
         )}
       </div>
     </div>

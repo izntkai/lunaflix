@@ -2,7 +2,7 @@ import { useParams, useNavigate, Link } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getPersonDetails } from "../services/tmdb";
 import { ArrowLeft, Loader2, Film, MapPin, Calendar, Tv } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion"; // Added AnimatePresence
+import { AnimatePresence } from "framer-motion";
 
 export default function Person() {
   const { id } = useParams();
@@ -44,7 +44,7 @@ export default function Person() {
         .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background: rgba(145, 70, 255, 0.3); border-radius: 10px; }
       `}</style>
-    <div className="pt-20 px-4 pb-8 max-w-5xl mx-auto">
+    <div className="px-4 pb-8 max-w-5xl mx-auto">
         <button onClick={() => navigate(-1)} className="flex items-center gap-2 mb-4 text-xs text-gray-500 hover:text-white transition group cursor-pointer">
           <ArrowLeft size={14} className="group-hover:-translate-x-1 transition-transform" /> Back
         </button>
@@ -52,17 +52,13 @@ export default function Person() {
         <div className="flex flex-col md:flex-row gap-6">
           {/* Left Column: Profile Card */}
           <div className="w-full md:w-56 shrink-0 space-y-4">
-            <motion.div 
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="relative group"
-            >
+            <div className="relative group">
               <img 
                 src={`https://image.tmdb.org/t/p/w500${person.profile_path}`}
                 alt={person.name}
                 className="w-40 md:w-full mx-auto rounded-xl shadow-xl border border-white/5 object-cover aspect-2/3"
               />
-            </motion.div>
+            </div>
             
             <div className="hidden md:block bg-white/5 p-3 rounded-xl border border-white/5 space-y-3">
               <div>
@@ -79,13 +75,9 @@ export default function Person() {
           {/* Right Column: Content */}
           <div className="flex-1 min-w-0 space-y-6">
             <header className="space-y-3">
-              <motion.h1 
-                initial={{ opacity: 0, y: -10 }}
-                animate={{ opacity: 1, y: 0 }}
-                className="text-3xl md:text-4xl font-title font-bold tracking-tight text-center md:text-left"
-              >
+              <h1 className="text-3xl md:text-4xl font-title font-bold tracking-tight text-center md:text-left">
                 {person.name}
-              </motion.h1>
+              </h1>
               
               <div className="font-subtitle flex md:hidden items-center justify-center gap-4 text-[11px] text-gray-400 border-y border-white/5 py-2">
                 <span className="flex items-center gap-1"><Calendar size={12}/> {person.birthday || "N/A"}</span>
@@ -118,13 +110,7 @@ export default function Person() {
                       {tab === "movie" ? <Film size={12} /> : <Tv size={12} />}
                       {tab === "movie" ? "MOVIES" : "TV SHOWS"} ({tab === "movie" ? movies.length : shows.length})
                       
-                      {activeTab === tab && (
-                        <motion.div 
-                          layoutId="activeTab"
-                          className="absolute inset-0 bg-purple-600 rounded-md -z-10"
-                          transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                        />
-                      )}
+                      {activeTab === tab && <div className="absolute inset-0 bg-purple-600 rounded-md -z-10" />}
                     </button>
                   ))}
                 </div>
@@ -132,14 +118,7 @@ export default function Person() {
 
               {/* Animated Grid Container */}
               <AnimatePresence mode="wait">
-                <motion.div
-                  key={activeTab}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -10 }}
-                  transition={{ duration: 0.3 }}
-                  className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3"
-                >
+                <div className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-6 gap-3">
                   {displayCredits.length > 0 ? (
                     displayCredits.slice(0, 30).map((media) => (
                       <Link 
@@ -172,7 +151,7 @@ export default function Person() {
                        <p className="text-gray-500 text-xs">No {activeTab === 'movie' ? 'movies' : 'TV shows'} found in our records.</p>
                     </div>
                   )}
-                </motion.div>
+                </div>
               </AnimatePresence>
             </section>
           </div>

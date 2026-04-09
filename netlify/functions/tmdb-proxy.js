@@ -1,5 +1,4 @@
-// Remove the node-fetch line entirely. 
-// Modern Node (18+) has fetch built-in!
+/* global process */
 
 export const handler = async (event) => {
     const { path, queryStringParameters } = event;
@@ -30,7 +29,7 @@ export const handler = async (event) => {
         },
         body: JSON.stringify(data),
       };
-    } catch (error) {
+    } catch {
       return {
         statusCode: 500,
         body: JSON.stringify({ error: "Failed fetching data from TMDB" }),

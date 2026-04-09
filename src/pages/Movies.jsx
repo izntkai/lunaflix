@@ -3,7 +3,6 @@ import { useNavigate } from "react-router-dom";
 import { getMovieGenres, discoverMovies } from "../services/tmdb";
 import FilterBar from "../components/FilterBar";
 import { Star, Play, Loader2 } from "lucide-react";
-import { motion } from "framer-motion";
 
 export default function Movies() {
   const navigate = useNavigate();
@@ -26,7 +25,7 @@ export default function Movies() {
       try {
         const genreData = await getMovieGenres();
         setGenres(genreData.genres || []);
-        await fetchMovies(1, true); 
+        await fetchMovies(1, true);
       } catch (err) {
         console.error(err);
       } finally {
@@ -42,7 +41,7 @@ export default function Movies() {
       fetchMovies(1, true);
     }
     // Added selectedRuntime dependency
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime]); 
+  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime, loading]); 
 
   const fetchMovies = async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
@@ -72,7 +71,7 @@ export default function Movies() {
   return (
     <div className="pb-20">
       
-      <div className="pt-24 px-4 md:px-8 max-w-7xl mx-auto">
+      <div className="px-4 md:px-8 max-w-7xl mx-auto">
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-8 bg-purple-500 rounded-full" />
@@ -102,12 +101,8 @@ export default function Movies() {
         ) : movies.length > 0 ? (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
             {movies.map((movie) => (
-              <motion.div
+              <div
                 key={movie.id}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                whileHover={{ scale: 1.05, y: -5 }}
-                transition={{ duration: 0.2 }}
                 onClick={() => navigate(`/details/movie/${movie.id}`)}
                 className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
               >
@@ -131,7 +126,7 @@ export default function Movies() {
                     <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
                   </div>
                 </div>
-              </motion.div>
+              </div>
             ))}
           </div>
         ) : (
