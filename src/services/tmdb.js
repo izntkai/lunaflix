@@ -44,7 +44,7 @@ export async function getTrendingMovies() {
 // Get movie details + credits
 export async function getMovieInfo(id) {
   const res = await fetch(
-    `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits`
+    `${BASE_URL}/movie/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits,images&include_image_language=en,null`
   );
   if (!res.ok) throw new Error("Failed to fetch movie info");
   return res.json();
@@ -100,7 +100,7 @@ export async function getPopularTV() {
 }
 
 export async function getTvInfo(id) {
-  const res = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits`);
+  const res = await fetch(`${BASE_URL}/tv/${id}?api_key=${API_KEY}&language=en-US&append_to_response=credits,images&include_image_language=en,null`);
   if (!res.ok) throw new Error("Failed to fetch TV info");
   return res.json();
 }

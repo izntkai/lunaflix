@@ -3,12 +3,12 @@ import { useNavigate } from "react-router-dom";
 
 export function DetailsHeroInfo({ movie, trailer, type, id }) {
   const navigate = useNavigate();
-  
+
   return (
-    <div className="relative z-20 px-6 md:px-20 pt-32 md:pt-48 pb-16 md:pb-24 max-w-[1600px] mx-auto w-full">
+    <div className="relative z-20 px-6 md:px-20 pt-20 md:pt-48 pb-16 md:pb-24 max-w-[1600px] mx-auto w-full">
       <div className="flex flex-col md:flex-row gap-10 md:gap-16 items-center md:items-end">
         {/* Poster Box */}
-        <div className="w-40 sm:w-56 md:w-60 shrink-0 rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] border border-white/10 z-30 transition-all duration-700 group-hover/hero:scale-105 group-hover/hero:border-purple-500/50">
+        <div className="w-53 sm:w-56 md:w-60 shrink-0 rounded-2xl overflow-hidden shadow-[0_40px_80px_rgba(0,0,0,0.9)] border border-white/10 z-30 transition-all duration-700 group-hover/hero:scale-105 group-hover/hero:border-purple-500/50">
           <img
             src={`https://image.tmdb.org/t/p/w500${movie.poster_path}`}
             alt={movie.title || movie.name}
@@ -32,9 +32,19 @@ export function DetailsHeroInfo({ movie, trailer, type, id }) {
             </span>
           </div>
 
-          <h1 className="text-4xl md:text-7xl font-title font-black text-white tracking-tight leading-[0.95] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
-            {movie.title || movie.name}
-          </h1>
+          {movie.images?.logos?.length > 0 ? (
+            <div className="flex justify-center md:justify-start">
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.images.logos[0].file_path}`}
+                alt={movie.title || movie.name}
+                className="h-20 sm:h-24 md:h-32 lg:h-40 object-contain drop-shadow-2xl brightness-110"
+              />
+            </div>
+          ) : (
+            <h1 className="text-4xl md:text-7xl font-title font-black text-white tracking-tight leading-[0.95] drop-shadow-[0_10px_30px_rgba(0,0,0,0.8)]">
+              {movie.title || movie.name}
+            </h1>
+          )}
 
           <div className="flex flex-wrap justify-center md:justify-start items-center gap-5 text-[11px] md:text-xs text-gray-400 font-bold uppercase tracking-widest">
             <div className="flex items-center gap-2">

@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { getTrendingAll, getPopularMovies, getTopRatedMovies, getPopularTV } from "../services/tmdb";
+import { getTrendingAll, getPopularMovies, getTopRatedMovies, getPopularTV, getMovieInfo, getTvInfo } from "../services/tmdb";
 import { Hero } from "../components/home/Hero";
 import { MovieRow } from "../components/home/MovieRow";
 import { HomeSkeleton } from "../components/home/HomeSkeleton";
@@ -19,16 +19,28 @@ export default function Home() {
         ]);
 
         const trending = trendingRes.results || [];
-        const randomFeatured = trending.length > 0
+        const initialFeatured = trending.length > 0
           ? trending[Math.floor(Math.random() * 10)]
           : null;
+
+        // Fetch detailed featured movie for logo support
+        let detailedFeatured = initialFeatured;
+        if (initialFeatured) {
+          try {
+            const type = initialFeatured.media_type || (initialFeatured.name ? "tv" : "movie");
+            const fetchFn = type === "movie" ? getMovieInfo : getTvInfo;
+            detailedFeatured = await fetchFn(initialFeatured.id);
+          } catch (err) {
+            console.warn("Failed to fetch detailed featured movie, using initial", err);
+          }
+        }
 
         setData({
           trending,
           popularMovies: popularMoviesRes.results || [],
           popularTV: popularTVRes.results || [],
           topRated: topRatedRes.results || [],
-          featured: randomFeatured
+          featured: detailedFeatured
         });
       } catch (error) {
         console.error("Fetch error:", error);

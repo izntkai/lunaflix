@@ -35,9 +35,19 @@ export function Hero({ movie }) {
             )}
           </div>
 
-          <h1 className="text-4xl md:text-5xl font-title font-bold text-white leading-[1.1] drop-shadow-xl">
-            {movie.title || movie.name}
-          </h1>
+          {movie.images?.logos?.length > 0 ? (
+            <div className="flex justify-start pb-2">
+              <img
+                src={`https://image.tmdb.org/t/p/w500${movie.images.logos[0].file_path}`}
+                alt={movie.title || movie.name}
+                className="h-16 md:h-24 lg:h-28 object-contain drop-shadow-2xl brightness-110"
+              />
+            </div>
+          ) : (
+            <h1 className="text-4xl md:text-5xl font-title font-bold text-white leading-[1.1] drop-shadow-xl">
+              {movie.title || movie.name}
+            </h1>
+          )}
 
           <p className="font-paragraph text-gray-300 text-xs md:text-sm line-clamp-2 md:line-clamp-3 leading-relaxed max-w-lg">
             {movie.overview}
