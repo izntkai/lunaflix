@@ -1,11 +1,20 @@
+import { Capacitor } from "@capacitor/core";
+
 const IS_DEV = import.meta.env.DEV;
 const VITE_API_KEY = import.meta.env.VITE_TMDB_API_KEY || "";
 
+// In Capacitor mobile, we cannot use relative URLs for the Netlify proxy.
+// Change this URL to your actual deployed Netlify production URL.
+const PRODUCTION_PROXY = "https://lunaflix.netlify.app/.netlify/functions/tmdb-proxy";
+
 // If in development and we have an API key, use direct TMDB URL.
-// Otherwise, use the Netlify proxy (which will be handled by netlify dev or production).
+// If on a native platform (Android/iOS), use the absolute production proxy URL.
+// Otherwise, use the relative Netlify proxy for web production/dev.
 export const BASE_URL = (IS_DEV && VITE_API_KEY) 
   ? "https://api.themoviedb.org/3" 
-  : "/.netlify/functions/tmdb-proxy";
+  : Capacitor.isNativePlatform()
+    ? PRODUCTION_PROXY
+    : "/.netlify/functions/tmdb-proxy";
 
 export const API_KEY = (IS_DEV && VITE_API_KEY) ? VITE_API_KEY : ""; 
 

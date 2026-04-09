@@ -1,15 +1,17 @@
 import { useState, useEffect } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
+import { Search, Menu, X, User } from "lucide-react";
 import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
 import { NavLink } from "./NavLink";
 import { MobileMenu } from "./MobileMenu";
+import { usePlatform } from "../hooks/usePlatform";
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
   const [isSearchOpen, setIsSearchOpen] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
+  const { isNative } = usePlatform();
 
   const navigate = useNavigate();
 
@@ -34,6 +36,28 @@ export default function Navbar() {
       setIsMobileMenuOpen(false);
     }
   };
+
+  if (isNative) {
+    return (
+      <motion.header
+        initial={{ y: -50, opacity: 0 }}
+        animate={{ y: 0, opacity: 1 }}
+        className="fixed top-0 left-0 right-0 z-50 px-6 py-4 flex items-center justify-between bg-black/40 backdrop-blur-md border-b border-white/5"
+      >
+        <Link to="/" className="flex items-center gap-2">
+          <span className="text-xl font-logo tracking-tighter text-white">
+            LUNA<span className="text-purple-500 font-bold">FLIX</span>
+          </span>
+        </Link>
+        <motion.button
+          whileTap={{ scale: 0.9 }}
+          className="p-2 bg-white/5 rounded-full border border-white/10 text-gray-400"
+        >
+          <User size={20} />
+        </motion.button>
+      </motion.header>
+    );
+  }
 
   return (
     <>

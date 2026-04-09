@@ -1,19 +1,31 @@
 import { useParams, Link, useNavigate } from "react-router-dom";
 import { useEffect, useState } from "react";
 import { searchMulti } from "../services/tmdb";
-import { Search as SearchIcon, Film, Star, ArrowLeft, Loader2, Tv } from "lucide-react";
+import { Search as SearchIcon, Film, Star, ArrowLeft, Loader2, Tv, X } from "lucide-react";
+import { usePlatform } from "../hooks/usePlatform";
+import { Haptics, ImpactStyle } from "@capacitor/haptics";
 
 // --- Sub-Component: Compact Search Card ---
 const SearchCard = ({ item }) => {
+  const { isNative } = usePlatform();
   // Determine properties based on media type (Movie vs TV)
   const isMovie = item.media_type === "movie" || item.title;
   const title = item.title || item.name;
   const date = item.release_date || item.first_air_date;
   const type = item.media_type || (item.title ? "movie" : "tv");
 
+  const handleCardClick = async () => {
+    if (isNative) {
+      try {
+        await Haptics.impact({ style: ImpactStyle.Light });
+      } catch (e) {}
+    }
+  };
+
   return (
     <Link 
       to={`/details/${type}/${item.id}`} 
+      onClick={handleCardClick}
       className="group relative block w-full aspect-[2/3] bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300"
     >
       {item.poster_path ? (
@@ -53,11 +65,13 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(query || "");
+  const { isNative } = usePlatform();
 
   // Fetch results
   useEffect(() => {
     const delayDebounce = setTimeout(() => {
       if (query) {
+        setLoading(true);
         searchMulti(query).then((data) => {
           // Filter out people, keeping only movies and tv shows
           const filtered = (data.results || []).filter(item => item.media_type !== "person");
@@ -80,41 +94,63 @@ export default function Search() {
     }
   };
 
+  const clearSearch = async () => {
+    setSearchTerm("");
+    if (isNative) {
+      try { await Haptics.impact({ style: ImpactStyle.Light }); } catch(e) {}
+    }
+    navigate("/search");
+  };
+
   return (
-    <div className="pt-16">
+    <div className={isNative ? "pt-0 pb-10" : "pt-16"}>
       
       {/* --- Sticky Header --- */}
-      <div className="sticky top-16 z-40 bg-[#0f0f0f]/95 backdrop-blur-md border-b border-white/5 py-4 px-4 md:px-8">
+      <div className={`sticky ${isNative ? 'top-14 pt-4' : 'top-16'} z-40 bg-[#0f0f0f]/95 backdrop-blur-md border-b border-white/5 pb-4 px-4 md:px-8`}>
         <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="p-2 rounded-full hover:bg-white/10 transition text-gray-400 hover:text-white"
-          >
-            <ArrowLeft size={20} />
-          </button>
+          {!isNative && (
+            <button 
+              onClick={() => navigate(-1)} 
+              className="p-2 rounded-full hover:bg-white/10 transition text-gray-400 hover:text-white"
+            >
+              <ArrowLeft size={20} />
+            </button>
+          )}
           
-          <form onSubmit={handleSearch} className="flex-1 relative max-w-lg">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
+          <form onSubmit={handleSearch} className="flex-1 relative">
+            <SearchIcon className="absolute left-4 top-1/2 -translate-y-1/2 text-gray-500" size={18} />
             <input 
               type="text" 
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
               placeholder="Search movies & TV shows..." 
-              className="w-full bg-[#202020] font-title text-sm text-white pl-10 pr-4 py-2 rounded-lg border border-transparent focus:border-white/20 focus:bg-[#252525] outline-none transition-all placeholder:text-gray-600"
+              className={`w-full bg-[#1a1a1a] font-title text-base text-white pl-12 pr-12 py-3.5 rounded-2xl border border-white/5 focus:border-purple-500/50 focus:bg-[#202020] outline-none transition-all placeholder:text-gray-600 shadow-inner ${isNative ? 'text-lg' : ''}`}
+              autoFocus
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={clearSearch}
+                className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-500 p-1 hover:text-white"
+              >
+                <X size={18} />
+              </button>
+            )}
           </form>
         </div>
       </div>
 
       {/* --- Main Content --- */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 mt-6">
+      <div className="max-w-6xl mx-auto px-4 md:px-8 mt-4">
         
         {/* Results Header */}
-        <div className="mb-6 flex items-baseline gap-2">
-          <h1 className="text-xl font-title font-bold text-white">Results for</h1>
-          <span className="text-xl font-bold text-purple-400 font-title italic">"{query}"</span>
-          <span className="text-xs text-gray-500 ml-auto">{results.length} items found</span>
-        </div>
+        {query && (
+          <div className="mb-4 flex items-baseline gap-2">
+            <h1 className="text-lg font-title font-medium text-gray-400">Results for</h1>
+            <span className="text-lg font-bold text-white font-title italic">"{query}"</span>
+            <span className="text-xs text-gray-600 ml-auto">{results.length} found</span>
+          </div>
+        )}
 
         {/* Content State */}
         {loading ? (
