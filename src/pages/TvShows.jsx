@@ -57,7 +57,7 @@ export default function TvShows() {
       });
 
       const results = data.results;
-      
+
       setShows(prev => reset ? results : [...prev, ...results]);
       setPage(pageNum);
     } catch (err) {
@@ -73,15 +73,15 @@ export default function TvShows() {
   };
 
   return (
-    <div className="pb-20">
-      
+    <div className="pb-20 mt-10">
+
       <div className="px-4 md:px-8 max-w-7xl mx-auto">
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-8 bg-purple-500 rounded-full" />
-          <h1 className="text-2xl md:text-3xl font-title font-bold text-white">Explore Series</h1>
+          <h1 className="text-2xl md:text-4xl font-title font-bold text-white">Explore Series</h1>
         </div>
 
-        <FilterBar 
+        <FilterBar
           type="tv"
           genres={genres}
           selectedGenre={selectedGenre}
@@ -92,8 +92,8 @@ export default function TvShows() {
           setSelectedLanguage={setSelectedLanguage}
           minRating={minRating}
           setMinRating={setMinRating}
-          selectedExtra={selectedStatus}       
-          setSelectedExtra={setSelectedStatus} 
+          selectedExtra={selectedStatus}
+          setSelectedExtra={setSelectedStatus}
         />
 
         {loading ? (
@@ -105,7 +105,7 @@ export default function TvShows() {
             <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
               {shows.length > 0 ? (
                 shows.map((show) => (
-                <div
+                  <div
                     key={show.id}
                     onClick={() => navigate(`/details/tv/${show.id}`)}
                     className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
@@ -121,7 +121,7 @@ export default function TvShows() {
                       <div className="absolute top-3 right-3 bg-purple-600 p-2 rounded-full shadow-lg">
                         <Play size={16} fill="white" className="text-white" />
                       </div>
-                      
+
                       <h3 className="text-white text-xs font-bold truncate">{show.name}</h3>
                       <div className="flex items-center justify-between text-[10px] text-gray-400 mt-1">
                         <span className="flex items-center gap-1 text-yellow-500">
@@ -139,7 +139,7 @@ export default function TvShows() {
                   <p className="text-sm">Try adjusting your status or genre selection.</p>
                 </div>
               )}
-              </div>
+            </div>
           </AnimatePresence>
         )}
 

@@ -23,6 +23,7 @@ export default function Navbar() {
     { to: "/", label: "Home" },
     { to: "/movies", label: "Movies" },
     { to: "/series", label: "Series" },
+    { to: "/genres", label: "Genres" },
   ];
 
   const handleSearch = (e) => {

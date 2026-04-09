@@ -86,9 +86,13 @@ export function DetailsHeroInfo({ movie, trailer, type, id }) {
 
           <div className="flex flex-wrap justify-center md:justify-start gap-2 pt-2 pb-4 md:pb-0">
             {movie.genres?.map((g) => (
-              <span key={g.id} className="text-[10px] font-black uppercase text-gray-500 border border-white/5 bg-white/5 px-4 py-1.5 rounded-lg hover:border-purple-500/30 hover:text-purple-400 transition-all cursor-default">
+              <button
+                key={g.id}
+                onClick={() => navigate(`/genre/${type === 'movie' ? 'movie' : 'tv'}/${g.id}/${encodeURIComponent(g.name)}`)}
+                className="text-[10px] font-black uppercase text-gray-400 border border-white/5 bg-white/5 px-4 py-1.5 rounded-lg hover:border-purple-500 hover:text-white hover:bg-purple-500/10 transition-all cursor-pointer"
+              >
                 {g.name}
-              </span>
+              </button>
             ))}
           </div>
         </div>

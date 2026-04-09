@@ -16,7 +16,7 @@ export default function Movies() {
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
-  const [minRating, setMinRating] = useState(""); 
+  const [minRating, setMinRating] = useState("");
   const [selectedRuntime, setSelectedRuntime] = useState(""); // Added state for Runtime
 
   // Initial Load (Genres + First Page)
@@ -41,7 +41,7 @@ export default function Movies() {
       fetchMovies(1, true);
     }
     // Added selectedRuntime dependency
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime, loading]); 
+  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime, loading]);
 
   const fetchMovies = async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
@@ -50,11 +50,11 @@ export default function Movies() {
         genre: selectedGenre,
         year: selectedYear,
         language: selectedLanguage,
-        minRating: minRating, 
+        minRating: minRating,
         runtime: selectedRuntime, // Pass runtime to API
         page: pageNum,
       });
-      
+
       setMovies(prev => reset ? data.results : [...prev, ...data.results]);
       setPage(pageNum);
     } catch (err) {
@@ -69,17 +69,17 @@ export default function Movies() {
   };
 
   return (
-    <div className="pb-20">
-      
+    <div className="pb-20 mt-10">
+
       <div className="px-4 md:px-8 max-w-7xl mx-auto">
         {/* Page Title */}
         <div className="flex items-center gap-3 mb-6">
           <div className="w-1 h-8 bg-purple-500 rounded-full" />
-          <h1 className="text-2xl md:text-3xl font-title font-bold text-white">Explore Movies</h1>
+          <h1 className="text-2xl md:text-4xl font-title font-bold text-white">Explore Movies</h1>
         </div>
 
         {/* REUSABLE FILTER COMPONENT */}
-        <FilterBar 
+        <FilterBar
           genres={genres}
           selectedGenre={selectedGenre}
           setSelectedGenre={setSelectedGenre}
@@ -89,8 +89,8 @@ export default function Movies() {
           setSelectedLanguage={setSelectedLanguage}
           minRating={minRating}
           setMinRating={setMinRating}
-          selectedRuntime={selectedRuntime}       // Pass new state
-          setSelectedRuntime={setSelectedRuntime} // Pass new setter
+          selectedExtra={selectedRuntime}
+          setSelectedExtra={setSelectedRuntime}
         />
 
         {/* MOVIES GRID */}
@@ -117,7 +117,7 @@ export default function Movies() {
                   <div className="absolute top-3 right-3 bg-purple-600 p-2 rounded-full shadow-lg transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
                     <Play size={16} fill="white" className="text-white" />
                   </div>
-                  
+
                   <h3 className="text-white text-xs font-bold truncate">{movie.title}</h3>
                   <div className="flex items-center justify-between text-[10px] text-gray-400 mt-1">
                     <span className="flex items-center gap-1 text-yellow-500">
@@ -152,6 +152,6 @@ export default function Movies() {
 
     </div>
 
-    
+
   );
 }
