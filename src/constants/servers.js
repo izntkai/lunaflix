@@ -5,5 +5,4 @@ export const servers = [
   { name: "VidLink", url: (id, type, s, e) => `https://vidlink.pro/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}` },
   { name: "VidKing", url: (id, type, s, e) => `https://www.vidking.net/embed/${type}/${id}${type === 'tv' ? `/${s}/${e}` : ''}?color=9146ff` },
   { name: "SuperEmbed", url: (id, type, s, e) => `https://multiembed.mov/?video_id=${id}&tmdb=1${type === 'tv' ? `&s=${s}&e=${e}` : ''}` },
-  { name: "Smashy", url: (id, type, s, e) => `https://player.smashy.stream/${type}/${id}${type === 'tv' ? `?s=${s}&e=${e}` : ''}` },
 ];

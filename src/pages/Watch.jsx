@@ -1,7 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import { useWatch } from "../hooks/useWatch";
 import { servers } from "../constants/servers";
-import { DesktopSidebar, WatchHeader, MobileControls, DetailSection } from "../components/WatchComponents";
+import { WatchHeader, MobileControls, DesktopSidebar } from "../components/watch/WatchControls";
+import { DetailSection } from "../components/watch/WatchDetail";
 import { Loader2 } from "lucide-react";
 
 export default function Watch() {
