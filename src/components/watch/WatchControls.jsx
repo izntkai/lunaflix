@@ -13,10 +13,10 @@ export const DesktopSidebar = ({
             <select
               value={season}
               onChange={(e) => { setSeason(e.target.value); setEpisode(1); }}
-              className="w-full bg-white/[0.03] text-white text-sm py-2.5 px-3 rounded-xl border border-white/10 outline-none appearance-none hover:border-white/20 transition cursor-pointer font-medium"
+              className="w-full bg-[#1a1a1a] text-white text-sm py-2.5 px-3 rounded-xl border border-white/10 outline-none appearance-none hover:border-white/20 transition cursor-pointer font-medium"
             >
               {movie?.seasons?.filter(s => s.season_number > 0).map(s => (
-                <option key={s.id} value={s.season_number}>Season {s.season_number}</option>
+                <option key={s.id} value={s.season_number} className="bg-[#1a1a1a] text-white">Season {s.season_number}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none" size={15} />
@@ -28,10 +28,10 @@ export const DesktopSidebar = ({
             <select
               value={episode}
               onChange={(e) => setEpisode(e.target.value)}
-              className="w-full bg-white/[0.03] text-white text-sm py-2.5 px-3 rounded-xl border border-white/10 outline-none appearance-none hover:border-white/20 transition cursor-pointer font-medium"
+              className="w-full bg-[#1a1a1a] text-white text-sm py-2.5 px-3 rounded-xl border border-white/10 outline-none appearance-none hover:border-white/20 transition cursor-pointer font-medium"
             >
               {episodeList.map(ep => (
-                <option key={ep} value={ep}>Episode {ep}</option>
+                <option key={ep} value={ep} className="bg-[#1a1a1a] text-white">Episode {ep}</option>
               ))}
             </select>
             <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 text-white/45 pointer-events-none" size={15} />
@@ -87,13 +87,13 @@ export const MobileControls = ({ isTv, movie, season, setSeason, setEpisode, epi
       <div className="grid grid-cols-2 gap-2">
         <div className="relative">
           <select value={season} onChange={(e) => { setSeason(e.target.value); setEpisode(1); }} className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none">
-            {movie?.seasons?.filter(s => s.season_number > 0).map(s => <option key={s.id} value={s.season_number}>Season {s.season_number}</option>)}
+            {movie?.seasons?.filter(s => s.season_number > 0).map(s => <option key={s.id} value={s.season_number} className="bg-[#161616] text-white">Season {s.season_number}</option>)}
           </select>
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
         </div>
         <div className="relative">
           <select value={episode} onChange={(e) => setEpisode(e.target.value)} className="w-full bg-[#161616] text-white text-sm py-3 px-4 rounded-xl border border-white/10 outline-none appearance-none">
-            {episodeList.map(ep => <option key={ep} value={ep}>Episode {ep}</option>)}
+            {episodeList.map(ep => <option key={ep} value={ep} className="bg-[#161616] text-white">Episode {ep}</option>)}
           </select>
           <ChevronDown className="absolute right-4 top-1/2 -translate-y-1/2 text-purple-500 pointer-events-none" size={16} />
         </div>
