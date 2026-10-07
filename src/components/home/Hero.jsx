@@ -1,74 +1,91 @@
 import { useNavigate } from "react-router-dom";
-import { Play, Info, Star, Calendar } from "lucide-react";
+import { Play, Plus, Star } from "lucide-react";
+import { toggleMyList } from "../../services/library";
 
 export function Hero({ movie }) {
   const navigate = useNavigate();
-  if (!movie) return <div className="h-[60vh] w-full bg-[#1a1a1a] animate-pulse rounded-2xl mx-4 mt-24" />;
+
+  if (!movie) {
+    return <div className="mx-4 mt-6 h-[58vh] animate-pulse rounded-3xl bg-[#18181C] md:mx-10" />;
+  }
 
   const mediaType = movie.media_type || (movie.name ? "tv" : "movie");
+  const title = movie.title || movie.name;
+  const year = (movie.release_date || movie.first_air_date || "").slice(0, 4);
+  const runtime = movie.runtime || movie.episode_run_time?.[0];
+
+  const handleAdd = () => {
+    toggleMyList({
+      id: movie.id,
+      type: mediaType,
+      title: movie.title,
+      name: movie.name,
+      poster_path: movie.poster_path,
+      backdrop_path: movie.backdrop_path,
+      vote_average: movie.vote_average,
+      release_date: movie.release_date,
+      first_air_date: movie.first_air_date,
+    });
+  };
 
   return (
-    <div className="pb-6 px-4 md:px-8 max-w-450 mx-auto">
-      <div className="relative h-[55vh] md:h-[65vh] w-full rounded-3xl overflow-hidden shadow-[0_0_40px_rgba(0,0,0,0.6)] group border border-white/5 bg-[#141414]">
-        <div className="absolute inset-0">
-          <img
-            src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
-            alt={movie.title || movie.name}
-            className="w-full h-full object-cover opacity-90"
-          />
-        </div>
+    <section className="mx-4 mt-6 rounded-3xl border border-[#2A2A2F] bg-[#111114] md:mx-10">
+      <div className="relative min-h-[62vh] overflow-hidden rounded-3xl">
+        <img
+          src={`https://image.tmdb.org/t/p/original${movie.backdrop_path}`}
+          alt={title}
+          className="absolute inset-0 h-full w-full object-cover"
+        />
+        <div className="absolute inset-0 bg-gradient-to-r from-[#050505] via-[#050505]/85 to-[#050505]/30" />
+        <div className="absolute inset-0 bg-gradient-to-t from-[#050505] via-[#050505]/20 to-transparent" />
 
-        <div className="absolute inset-0 bg-gradient-to-r from-black/95 via-black/50 to-transparent" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0a0a0a] via-transparent to-transparent" />
-
-        <div className="absolute bottom-0 top-0 left-0 flex flex-col justify-center px-8 md:px-16 max-w-2xl space-y-5">
-          <div className="flex items-center gap-3 text-xs font-semibold tracking-wide">
-            <span className="font-paragraph bg-purple-500 text-black px-2 py-0.5 rounded">FEATURED</span>
-            <span className="font-paragraph flex items-center gap-1 text-purple-400 bg-purple-400/10 px-2 py-0.5 rounded">
-              <Star size={12} fill="currentColor" /> {movie.vote_average?.toFixed(1)}
+        <div className="relative z-10 flex h-full max-w-3xl flex-col justify-end gap-5 p-6 pb-10 md:p-10">
+          <div className="flex flex-wrap items-center gap-2 text-xs text-[#D4D4D8]">
+            <span className="rounded-full bg-[#A78BFA]/20 px-3 py-1 font-semibold text-[#C4B5FD]">{mediaType.toUpperCase()}</span>
+            <span className="flex items-center gap-1 rounded-full bg-black/35 px-3 py-1">
+              <Star size={12} fill="currentColor" className="text-[#C4B5FD]" />
+              {movie.vote_average?.toFixed(1)}
             </span>
-            <span className="font-paragraph text-gray-300 flex items-center gap-1 bg-white/10 px-2 py-0.5 rounded">
-              <Calendar size={12} /> {(movie.release_date || movie.first_air_date)?.split("-")[0]}
-            </span>
-            {mediaType === 'tv' && (
-              <span className="font-paragraph text-gray-300 border border-gray-600 px-2 py-0.5 rounded uppercase">TV Series</span>
-            )}
+            {year && <span>{year}</span>}
+            {runtime ? <span>{runtime} min</span> : null}
           </div>
 
-          {movie.images?.logos?.length > 0 ? (
-            <div className="flex justify-start pb-2">
-              <img
-                src={`https://image.tmdb.org/t/p/w500${movie.images.logos[0].file_path}`}
-                alt={movie.title || movie.name}
-                className="h-16 md:h-24 lg:h-28 object-contain drop-shadow-2xl brightness-110"
-              />
-            </div>
-          ) : (
-            <h1 className="text-4xl md:text-5xl font-title font-bold text-white leading-[1.1] drop-shadow-xl">
-              {movie.title || movie.name}
-            </h1>
-          )}
+          <h1 className="text-3xl font-bold leading-tight text-[#F5F5F5] md:text-5xl">{title}</h1>
 
-          <p className="font-paragraph text-gray-300 text-xs md:text-sm line-clamp-2 md:line-clamp-3 leading-relaxed max-w-lg">
-            {movie.overview}
+          <p className="max-w-2xl text-sm leading-relaxed text-[#D4D4D8] md:text-base">
+            {movie.overview || "No description available."}
           </p>
 
-          <div className="flex items-center gap-4 pt-2">
+          <div className="flex flex-wrap gap-2">
+            {(movie.genres || []).slice(0, 4).map((genre) => (
+              <span key={genre.id} className="rounded-full border border-[#2A2A2F] bg-black/35 px-3 py-1 text-xs text-[#A1A1AA]">
+                {genre.name}
+              </span>
+            ))}
+          </div>
+
+          <div className="flex flex-wrap gap-3 pt-1">
             <button
               onClick={() => navigate(`/watch/${mediaType}/${movie.id}`)}
-              className="font-title flex items-center gap-2 bg-purple-500 text-black px-6 py-3 rounded-xl hover:bg-gray-200 hover:scale-105 transition-all duration-300 font-bold text-sm md:text-base shadow-[0_0_20px_rgba(255,255,255,0.3)]"
+              className="inline-flex items-center gap-2 rounded-xl bg-[#A78BFA] px-5 py-3 text-sm font-semibold text-black transition hover:bg-[#C4B5FD]"
             >
-              <Play size={20} fill="currentColor" /> Watch Now
+              <Play size={16} fill="currentColor" /> Watch Now
+            </button>
+            <button
+              onClick={handleAdd}
+              className="inline-flex items-center gap-2 rounded-xl border border-[#2A2A2F] bg-black/40 px-5 py-3 text-sm font-semibold text-[#F5F5F5] transition hover:border-[#A78BFA]"
+            >
+              <Plus size={16} /> Add to My List
             </button>
             <button
               onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
-              className="font-title flex items-center gap-2 bg-white/10 backdrop-blur-md border border-white/20 text-white px-6 py-3 rounded-xl hover:bg-white/20 transition-all duration-300 font-semibold text-sm md:text-base"
+              className="rounded-xl border border-[#2A2A2F] bg-[#18181C]/70 px-5 py-3 text-sm font-semibold text-[#F5F5F5] transition hover:border-[#A78BFA]"
             >
-              <Info size={20} /> Details
+              Details
             </button>
           </div>
         </div>
       </div>
-    </div>
+    </section>
   );
 }

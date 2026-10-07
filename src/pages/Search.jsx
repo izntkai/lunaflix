@@ -1,51 +1,10 @@
-import { useParams, Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useParams, useNavigate } from "react-router-dom";
+import { useEffect, useMemo, useState } from "react";
 import { searchMulti } from "../services/tmdb";
-import { Search as SearchIcon, Film, Star, ArrowLeft, Loader2, Tv } from "lucide-react";
+import { ArrowLeft, Loader2, Search as SearchIcon } from "lucide-react";
+import SearchResultCard from "../components/search/SearchResultCard";
 
-// --- Sub-Component: Compact Search Card ---
-const SearchCard = ({ item }) => {
-  // Determine properties based on media type (Movie vs TV)
-  const isMovie = item.media_type === "movie" || item.title;
-  const title = item.title || item.name;
-  const date = item.release_date || item.first_air_date;
-  const type = item.media_type || (item.title ? "movie" : "tv");
-
-  return (
-    <Link 
-      to={`/details/${type}/${item.id}`} 
-      className="group relative block w-full aspect-[2/3] bg-[#202020] rounded-xl overflow-hidden shadow-lg ring-1 ring-white/10 hover:ring-white/30 transition-all duration-300"
-    >
-      {item.poster_path ? (
-        <img
-          src={`https://image.tmdb.org/t/p/w400${item.poster_path}`}
-          alt={title}
-          className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-          loading="lazy"
-        />
-      ) : (
-        <div className="w-full h-full flex flex-col items-center justify-center text-gray-500 bg-[#1a1a1a]">
-          {isMovie ? <Film size={24} className="mb-2 opacity-50" /> : <Tv size={24} className="mb-2 opacity-50" />}
-          <span className="text-xs">No Image</span>
-        </div>
-      )}
-
-      {/* Hover Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/40 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-        <h3 className="text-white text-sm font-title font-semibold truncate mb-1">{title}</h3>
-        <div className="font-subtitle flex items-center justify-between text-[10px] text-gray-300">
-          <span className="flex items-center gap-1 text-purple-500">
-            <Star size={10} fill="currentColor" /> {item.vote_average?.toFixed(1)}
-          </span>
-          <div className="flex items-center gap-2">
-            <span className="uppercase border border-white/20 px-1 rounded text-[8px]">{type}</span>
-            <span>{date?.split("-")[0] || "N/A"}</span>
-          </div>
-        </div>
-      </div>
-    </Link>
-  );
-};
+const filters = ["all", "movie", "tv", "person"];
 
 export default function Search() {
   const { query } = useParams();
@@ -53,89 +12,99 @@ export default function Search() {
   const [results, setResults] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState(query || "");
+  const [mediaFilter, setMediaFilter] = useState("all");
 
-  // Fetch results
   useEffect(() => {
-    const delayDebounce = setTimeout(() => {
-      if (query) {
-        searchMulti(query).then((data) => {
-          // Filter out people, keeping only movies and tv shows
-          const filtered = (data.results || []).filter(item => item.media_type !== "person");
-          setResults(filtered);
-          setLoading(false);
-        });
-      } else {
+    setSearchTerm(query || "");
+    const timer = setTimeout(() => {
+      if (!query) {
         setResults([]);
         setLoading(false);
+        return;
       }
-    }, 300); 
 
-    return () => clearTimeout(delayDebounce);
+      setLoading(true);
+      searchMulti(query)
+        .then((data) => setResults(data.results || []))
+        .catch((error) => {
+          console.error(error);
+          setResults([]);
+        })
+        .finally(() => setLoading(false));
+    }, 250);
+
+    return () => clearTimeout(timer);
   }, [query]);
 
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (searchTerm.trim()) {
-      navigate(`/search/${searchTerm}`);
-    }
+  const filteredResults = useMemo(() => {
+    if (mediaFilter === "all") return results;
+    return results.filter((item) => item.media_type === mediaFilter);
+  }, [results, mediaFilter]);
+
+  const handleSearch = (event) => {
+    event.preventDefault();
+    if (!searchTerm.trim()) return;
+    navigate(`/search/${searchTerm.trim()}`);
   };
 
   return (
-    <div className="pt-16">
-      
-      {/* --- Sticky Header --- */}
-      <div className="sticky top-16 z-40 bg-[#0f0f0f]/95 backdrop-blur-md border-b border-white/5 py-4 px-4 md:px-8">
-        <div className="max-w-6xl mx-auto flex items-center gap-4">
-          <button 
-            onClick={() => navigate(-1)} 
-            className="p-2 rounded-full hover:bg-white/10 transition text-gray-400 hover:text-white"
-          >
-            <ArrowLeft size={20} />
-          </button>
-          
-          <form onSubmit={handleSearch} className="flex-1 relative max-w-lg">
-            <SearchIcon className="absolute left-3 top-1/2 -translate-y-1/2 text-gray-500" size={16} />
-            <input 
-              type="text" 
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
-              placeholder="Search movies & TV shows..." 
-              className="w-full bg-[#202020] font-title text-sm text-white pl-10 pr-4 py-2 rounded-lg border border-transparent focus:border-white/20 focus:bg-[#252525] outline-none transition-all placeholder:text-gray-600"
-            />
-          </form>
-        </div>
+    <div className="px-4 pb-16 pt-6 md:px-8">
+      <div className="mb-6 flex items-center gap-3">
+        <button
+          onClick={() => navigate(-1)}
+          className="rounded-xl border border-[#2A2A2F] bg-[#111114] p-2 text-[#A1A1AA] hover:text-[#F5F5F5]"
+        >
+          <ArrowLeft size={18} />
+        </button>
+        <form onSubmit={handleSearch} className="relative w-full max-w-2xl">
+          <SearchIcon className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA]" size={16} />
+          <input
+            type="text"
+            value={searchTerm}
+            onChange={(event) => setSearchTerm(event.target.value)}
+            placeholder="Search movies, TV shows, actors..."
+            className="w-full rounded-xl border border-[#2A2A2F] bg-[#111114] py-3 pl-10 pr-4 text-sm text-[#F5F5F5] outline-none focus:border-[#A78BFA]"
+          />
+        </form>
       </div>
 
-      {/* --- Main Content --- */}
-      <div className="max-w-6xl mx-auto px-4 md:px-8 mt-6">
-        
-        {/* Results Header */}
-        <div className="mb-6 flex items-baseline gap-2">
-          <h1 className="text-xl font-title font-bold text-white">Results for</h1>
-          <span className="text-xl font-bold text-purple-400 font-title italic">"{query}"</span>
-          <span className="text-xs text-gray-500 ml-auto">{results.length} items found</span>
-        </div>
+      <div className="mb-5 flex flex-wrap gap-2">
+        {filters.map((filter) => (
+          <button
+            key={filter}
+            onClick={() => setMediaFilter(filter)}
+            className={`rounded-full px-4 py-2 text-xs uppercase tracking-[0.15em] transition ${
+              mediaFilter === filter
+                ? "bg-[#A78BFA]/20 text-[#C4B5FD]"
+                : "bg-[#111114] text-[#A1A1AA] hover:text-[#F5F5F5]"
+            }`}
+          >
+            {filter}
+          </button>
+        ))}
+      </div>
 
-        {/* Content State */}
-        {loading ? (
-          <div className="flex flex-col items-center justify-center py-20">
-            <Loader2 className="animate-spin text-purple-600 w-8 h-8 mb-4" />
-            <p className="text-gray-500 text-sm">Searching the archives...</p>
-          </div>
-        ) : results.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-20 text-center">
-            <Film className="w-16 h-16 text-gray-700 mb-4" />
-            <h2 className="text-lg font-title font-semibold text-gray-300">No matches found</h2>
-            <p className="text-gray-500 font-paragraph text-sm mt-1">Try checking your spelling or search for another title.</p>
-          </div>
-        ) : (
-          <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 lg:grid-cols-6 gap-3 md:gap-4">
-            {results.map((item) => (
-              <SearchCard key={item.id} item={item} />
+      {loading ? (
+        <div className="flex h-[45vh] items-center justify-center">
+          <Loader2 className="h-9 w-9 animate-spin text-[#A78BFA]" />
+        </div>
+      ) : filteredResults.length ? (
+        <>
+          <p className="mb-4 text-sm text-[#A1A1AA]">
+            {filteredResults.length} results for <span className="text-[#C4B5FD]">“{query}”</span>
+          </p>
+          <div className="grid grid-cols-2 gap-4 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+            {filteredResults.map((item) => (
+              <SearchResultCard key={`${item.media_type}-${item.id}`} item={item} />
             ))}
           </div>
-        )}
-      </div>
+        </>
+      ) : (
+        <div className="rounded-2xl border border-[#2A2A2F] bg-[#111114] p-10 text-center">
+          <p className="text-lg text-[#F5F5F5]">No results found for “{query}”.</p>
+          <p className="mt-2 text-sm text-[#A1A1AA]">Try another title, genre, or person name.</p>
+        </div>
+      )}
     </div>
   );
 }

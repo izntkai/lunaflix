@@ -1,25 +1,23 @@
-import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom";
-import { getMovieGenres, discoverMovies } from "../services/tmdb";
+import { useEffect, useState } from "react";
+import { discoverMovies, getMovieGenres } from "../services/tmdb";
 import FilterBar from "../components/FilterBar";
-import { Star, Play, Loader2 } from "lucide-react";
+import { Loader2 } from "lucide-react";
+import MediaGrid from "../components/MediaGrid";
+import SectionHeader from "../components/SectionHeader";
 
 export default function Movies() {
-  const navigate = useNavigate();
   const [movies, setMovies] = useState([]);
   const [genres, setGenres] = useState([]);
   const [loading, setLoading] = useState(true);
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
 
-  // Filters State
   const [selectedGenre, setSelectedGenre] = useState("");
   const [selectedYear, setSelectedYear] = useState("");
   const [selectedLanguage, setSelectedLanguage] = useState("");
   const [minRating, setMinRating] = useState("");
-  const [selectedRuntime, setSelectedRuntime] = useState(""); // Added state for Runtime
+  const [selectedRuntime, setSelectedRuntime] = useState("");
 
-  // Initial Load (Genres + First Page)
   useEffect(() => {
     const init = async () => {
       try {
@@ -35,13 +33,9 @@ export default function Movies() {
     init();
   }, []);
 
-  // Re-fetch when filters change
   useEffect(() => {
-    if (!loading) {
-      fetchMovies(1, true);
-    }
-    // Added selectedRuntime dependency
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime, loading]);
+    if (!loading) fetchMovies(1, true);
+  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime]);
 
   const fetchMovies = async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
@@ -50,12 +44,11 @@ export default function Movies() {
         genre: selectedGenre,
         year: selectedYear,
         language: selectedLanguage,
-        minRating: minRating,
-        runtime: selectedRuntime, // Pass runtime to API
+        minRating,
+        runtime: selectedRuntime,
         page: pageNum,
       });
-
-      setMovies(prev => reset ? data.results : [...prev, ...data.results]);
+      setMovies((prev) => (reset ? data.results : [...prev, ...data.results]));
       setPage(pageNum);
     } catch (err) {
       console.error(err);
@@ -64,94 +57,48 @@ export default function Movies() {
     }
   };
 
-  const handleLoadMore = () => {
-    fetchMovies(page + 1);
-  };
-
   return (
-    <div className="pb-20 mt-10">
+    <div className="px-4 pb-16 pt-6 md:px-8">
+      <SectionHeader
+        eyebrow="Movies"
+        title="Explore Movies"
+        description="Discover popular, top-rated, and hidden gems with smart filters powered by TMDB data."
+      />
 
-      <div className="px-4 md:px-8 max-w-7xl mx-auto">
-        {/* Page Title */}
-        <div className="flex items-center gap-3 mb-6">
-          <div className="w-1 h-8 bg-purple-500 rounded-full" />
-          <h1 className="text-2xl md:text-4xl font-title font-bold text-white">Explore Movies</h1>
+      <FilterBar
+        genres={genres}
+        selectedGenre={selectedGenre}
+        setSelectedGenre={setSelectedGenre}
+        selectedYear={selectedYear}
+        setSelectedYear={setSelectedYear}
+        selectedLanguage={selectedLanguage}
+        setSelectedLanguage={setSelectedLanguage}
+        minRating={minRating}
+        setMinRating={setMinRating}
+        selectedExtra={selectedRuntime}
+        setSelectedExtra={setSelectedRuntime}
+      />
+
+      {loading ? (
+        <div className="flex h-[40vh] items-center justify-center">
+          <Loader2 className="h-10 w-10 animate-spin text-[#A78BFA]" />
         </div>
-
-        {/* REUSABLE FILTER COMPONENT */}
-        <FilterBar
-          genres={genres}
-          selectedGenre={selectedGenre}
-          setSelectedGenre={setSelectedGenre}
-          selectedYear={selectedYear}
-          setSelectedYear={setSelectedYear}
-          selectedLanguage={selectedLanguage}
-          setSelectedLanguage={setSelectedLanguage}
-          minRating={minRating}
-          setMinRating={setMinRating}
-          selectedExtra={selectedRuntime}
-          setSelectedExtra={setSelectedRuntime}
-        />
-
-        {/* MOVIES GRID */}
-        {loading ? (
-          <div className="h-[50vh] flex items-center justify-center">
-            <Loader2 className="animate-spin text-purple-500 w-10 h-10" />
-          </div>
-        ) : movies.length > 0 ? (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5 xl:grid-cols-6 gap-4">
-            {movies.map((movie) => (
-              <div
-                key={movie.id}
-                onClick={() => navigate(`/details/movie/${movie.id}`)}
-                className="group relative aspect-[2/3] bg-[#1a1a1a] rounded-xl overflow-hidden cursor-pointer shadow-lg border border-white/5"
-              >
-                <img
-                  src={movie.poster_path ? `https://image.tmdb.org/t/p/w500${movie.poster_path}` : "https://via.placeholder.com/500x750?text=No+Image"}
-                  alt={movie.title}
-                  className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-110"
-                  loading="lazy"
-                />
-
-                <div className="absolute inset-0 bg-gradient-to-t from-black/90 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex flex-col justify-end p-3">
-                  <div className="absolute top-3 right-3 bg-purple-600 p-2 rounded-full shadow-lg transform translate-y-2 opacity-0 group-hover:translate-y-0 group-hover:opacity-100 transition-all duration-300">
-                    <Play size={16} fill="white" className="text-white" />
-                  </div>
-
-                  <h3 className="text-white text-xs font-bold truncate">{movie.title}</h3>
-                  <div className="flex items-center justify-between text-[10px] text-gray-400 mt-1">
-                    <span className="flex items-center gap-1 text-yellow-500">
-                      <Star size={10} fill="currentColor" /> {movie.vote_average?.toFixed(1)}
-                    </span>
-                    <span>{movie.release_date?.split("-")[0] || "N/A"}</span>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </div>
-        ) : (
-          <div className="h-60 flex flex-col items-center justify-center text-gray-500">
-            <p className="text-lg">No movies found.</p>
-            <p className="text-sm">Try adjusting your filters.</p>
-          </div>
-        )}
-
-        {/* Load More Button */}
-        {!loading && movies.length > 0 && (
-          <div className="flex justify-center mt-12">
+      ) : movies.length ? (
+        <>
+          <MediaGrid items={movies} type="movie" />
+          <div className="mt-10 flex justify-center">
             <button
-              onClick={handleLoadMore}
+              onClick={() => fetchMovies(page + 1)}
               disabled={loadingMore}
-              className="px-8 py-3 bg-white/5 hover:bg-white/10 border border-white/10 rounded-full text-sm font-medium transition-all flex items-center gap-2 disabled:opacity-50"
+              className="rounded-xl border border-[#2A2A2F] bg-[#111114] px-6 py-3 text-sm text-[#F5F5F5] hover:border-[#A78BFA] disabled:opacity-50"
             >
-              {loadingMore ? <Loader2 className="animate-spin w-4 h-4" /> : "Load More Movies"}
+              {loadingMore ? "Loading..." : "Load More Movies"}
             </button>
           </div>
-        )}
-      </div>
-
+        </>
+      ) : (
+        <p className="py-16 text-center text-[#A1A1AA]">No movies found for these filters.</p>
+      )}
     </div>
-
-
   );
 }

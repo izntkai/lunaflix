@@ -1,11 +1,10 @@
 export default function Footer() {
-    return (
-        <footer className="py-12 px-10 text-center text-gray-400 text-xs md:text-sm bg-black/40 border-t border-white/10 mt-12">
-            <p className="mb-2 max-w-2xl mx-auto leading-relaxed opacity-80">
-                Disclaimer: This website does not own, store, or host any movie player content.
-                <br className="hidden md:block" /> All streaming players are embedded through third-party hosting services using their respective APIs.
-            </p>
-            <p className="font-title font-bold text-gray-300 tracking-widest mt-4">© 2026 LUNAFLIX</p>
-        </footer>
-    );
+  return (
+    <footer className="border-t border-[#2A2A2F] bg-[#08080A] px-6 py-10 text-center text-sm text-[#A1A1AA]">
+      <p className="mx-auto max-w-3xl leading-relaxed">
+        LunaFlix does not host video files. Playback is provided through external streaming providers and content metadata comes from TMDB.
+      </p>
+      <p className="mt-4 text-xs uppercase tracking-[0.2em] text-[#C4B5FD]">© 2026 LunaFlix</p>
+    </footer>
+  );
 }

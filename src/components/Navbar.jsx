@@ -1,149 +1,75 @@
-import { useState, useEffect } from "react";
+import { useEffect, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
-import { Search, Menu, X } from "lucide-react";
-import { motion, AnimatePresence, LayoutGroup } from "framer-motion";
+import { Search, Bell, UserCircle2 } from "lucide-react";
 import { NavLink } from "./NavLink";
-import { MobileMenu } from "./MobileMenu";
+
+const navItems = [
+  { to: "/", label: "Home" },
+  { to: "/movies", label: "Movies" },
+  { to: "/series", label: "TV Shows" },
+  { to: "/genres", label: "Genres" },
+  { to: "/trending", label: "Trending" },
+  { to: "/my-list", label: "My List" },
+];
 
 export default function Navbar() {
   const [isScrolled, setIsScrolled] = useState(false);
-  const [isSearchOpen, setIsSearchOpen] = useState(false);
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
   const [query, setQuery] = useState("");
-
   const navigate = useNavigate();
 
   useEffect(() => {
-    const handleScroll = () => setIsScrolled(window.scrollY > 20);
-    window.addEventListener("scroll", handleScroll);
-    return () => window.removeEventListener("scroll", handleScroll);
+    const onScroll = () => setIsScrolled(window.scrollY > 8);
+    onScroll();
+    window.addEventListener("scroll", onScroll);
+    return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  const navItems = [
-    { to: "/", label: "Home" },
-    { to: "/movies", label: "Movies" },
-    { to: "/series", label: "Series" },
-    { to: "/genres", label: "Genres" },
-  ];
-
-  const handleSearch = (e) => {
-    e.preventDefault();
-    if (query.trim()) {
-      navigate(`/search/${query}`);
-      setIsSearchOpen(false);
-      setIsMobileMenuOpen(false);
-    }
+  const onSearch = (event) => {
+    event.preventDefault();
+    if (!query.trim()) return;
+    navigate(`/search/${query.trim()}`);
+    setQuery("");
   };
 
   return (
-    <>
-      <motion.header 
-        initial={{ y: -100, x: "-50%", opacity: 0 }}
-        animate={{
-          y: 0,
-          x: "-50%",
-          opacity: 1,
-          top: isScrolled ? 16 : 24,
-          paddingTop: isScrolled ? 8 : 12,
-          paddingBottom: isScrolled ? 8 : 12,
-          paddingLeft: isScrolled ? 24 : 32,
-          paddingRight: isScrolled ? 24 : 32,
-          width: isScrolled ? "max-content" : "min(1200px, 92%)",
-          backgroundColor: isScrolled ? "rgba(10, 10, 10, 0.9)" : "rgba(255, 255, 255, 0.05)",
-          borderColor: isScrolled ? "rgba(168, 85, 247, 0.4)" : "rgba(255, 255, 255, 0.1)",
-          boxShadow: isScrolled ? "0 25px 50px -12px rgba(0, 0, 0, 0.5), 0 0 20px rgba(168, 85, 247, 0.2)" : "0 0 0 rgba(0,0,0,0)"
-        }}
-        transition={{ type: "spring", stiffness: 400, damping: 30, mass: 1 }}
-        className="fixed left-1/2 z-50 rounded-full border backdrop-blur-2xl flex items-center justify-between min-w-max"
-      >
-        <Link to="/" className="flex items-center group shrink-0" onClick={() => setIsMobileMenuOpen(false)}>
-
-
-          <motion.span
-            layout
-            animate={{
-              opacity: isScrolled ? 0 : 1,
-              width: isScrolled ? 0 : "auto",
-              marginLeft: isScrolled ? 0 : 8
-            }}
-            className="text-lg font-logo tracking-tighter text-white block overflow-hidden whitespace-nowrap"
-          >
-            LUNA<span className="text-purple-500">FLIX</span>
-          </motion.span>
+    <header
+      className={`sticky top-0 z-50 border-b transition ${
+        isScrolled ? "border-[#2A2A2F] bg-[#08080A]/90" : "border-transparent bg-transparent"
+      } backdrop-blur`}
+    >
+      <div className="mx-auto flex h-16 w-full max-w-[1680px] items-center gap-4 px-4 md:px-8">
+        <Link to="/" className="font-logo text-xl font-semibold tracking-tight text-[#F5F5F5]">
+          LUNA<span className="text-[#A78BFA]">FLIX</span>
         </Link>
 
-        <LayoutGroup>
-          <nav className="hidden md:flex items-center gap-1 bg-white/5 rounded-full p-1 border border-white/5 mx-4">
-            {navItems.map((item) => (
-              <NavLink key={item.to} to={item.to} label={item.label} />
-            ))}
-          </nav>
-        </LayoutGroup>
+        <nav className="hidden items-center gap-1 lg:flex">
+          {navItems.map((item) => (
+            <NavLink key={item.to} to={item.to} label={item.label} />
+          ))}
+        </nav>
 
-        <div className="flex items-center gap-1">
-          <form onSubmit={handleSearch} className="flex items-center">
-            <AnimatePresence mode="popLayout">
-              {isSearchOpen && (
-                <motion.div
-                  layout
-                  initial={{ width: 0, opacity: 0 }}
-                  animate={{ width: "auto", opacity: 1 }}
-                  exit={{ width: 0, opacity: 0 }}
-                  className="overflow-hidden"
-                >
-                  <input
-                    type="text"
-                    placeholder="Search..."
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    className="bg-white/10 border border-white/10 rounded-full py-2 px-4 text-[12px] text-white placeholder-gray-500 focus:outline-none focus:border-purple-500/50 w-32 md:w-48 ml-2"
-                    autoFocus
-                  />
-                </motion.div>
-              )}
-            </AnimatePresence>
-
-            <motion.button
-              layout
-              whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.05)" }}
-              whileTap={{ scale: 0.9 }}
-              type={isSearchOpen ? "submit" : "button"}
-              onClick={(e) => {
-                if (!isSearchOpen) {
-                  e.preventDefault();
-                  setIsSearchOpen(true);
-                } else if (!query) {
-                  setIsSearchOpen(false);
-                }
-              }}
-              className={`p-2.5 rounded-full transition-colors flex items-center justify-center ${isSearchOpen ? 'text-purple-400' : 'text-gray-400 hover:text-white'}`}
-            >
-              <Search size={18} />
-            </motion.button>
+        <div className="ml-auto hidden items-center gap-2 md:flex">
+          <form onSubmit={onSearch} className="relative">
+            <Search className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#A1A1AA]" size={14} />
+            <input
+              value={query}
+              onChange={(event) => setQuery(event.target.value)}
+              placeholder="Search movies, shows, people"
+              className="w-56 rounded-xl border border-[#2A2A2F] bg-[#111114] py-2 pl-9 pr-3 text-sm text-[#F5F5F5] outline-none transition focus:border-[#A78BFA]"
+            />
           </form>
-
-          <motion.button
-            layout
-            whileHover={{ scale: 1.1, backgroundColor: "rgba(255,255,255,0.05)" }}
-            whileTap={{ scale: 0.9 }}
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            className="md:hidden p-2.5 text-gray-400 hover:text-white rounded-full transition-colors flex items-center justify-center"
+          <button className="rounded-xl border border-[#2A2A2F] bg-[#111114] p-2 text-[#A1A1AA] hover:text-[#C4B5FD]" aria-label="Notifications">
+            <Bell size={16} />
+          </button>
+          <Link
+            to="/profile"
+            className="rounded-xl border border-[#2A2A2F] bg-[#111114] p-2 text-[#A1A1AA] hover:text-[#C4B5FD]"
+            aria-label="Profile"
           >
-            {isMobileMenuOpen ? <X size={20} /> : <Menu size={20} />}
-          </motion.button>
+            <UserCircle2 size={17} />
+          </Link>
         </div>
-      </motion.header>
-
-      {/* 4. MOBILE MENU OVERLAY */}
-      <AnimatePresence>
-        <MobileMenu
-          isMobileMenuOpen={isMobileMenuOpen}
-          setIsMobileMenuOpen={setIsMobileMenuOpen}
-          query={query}
-          setQuery={setQuery}
-          handleSearch={handleSearch}
-        />
-      </AnimatePresence>
-    </>
+      </div>
+    </header>
   );
 }
