@@ -5,9 +5,23 @@
 @import "tailwindcss";
 
 @theme {
-
   --font-logo: "BBH Bartle", sans-serif;
   --font-title: "Outfit", sans-serif;
   --font-paragraph: "Open Sans", sans-serif;
   --spacing-450: 112.5rem;
+}
+
+:root {
+  color-scheme: dark;
+}
+
+body {
+  margin: 0;
+  background: #050505;
+  color: #f5f5f5;
+  font-family: var(--font-paragraph);
+}
+
+* {
+  box-sizing: border-box;
 }

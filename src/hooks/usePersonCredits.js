@@ -7,7 +7,7 @@ export function usePersonCredits(person) {
     const cast = person.combined_credits.cast || [];
     const crew = person.combined_credits.crew || [];
 
-    const getGroups = (items) => {
+    const getGroups = () => {
       const groups = {
         acting: [],
         directing: [],

@@ -1,7 +1,7 @@
 import { useState, useMemo } from "react";
 import { Link } from "react-router-dom";
 import { Film, Tv, LayoutGrid } from "lucide-react";
-import { AnimatePresence, motion } from "framer-motion";
+import { AnimatePresence } from "framer-motion";
 
 export function PersonCredits({ credits }) {
   const [activeCategory, setActiveCategory] = useState("directing");
@@ -18,18 +18,13 @@ export function PersonCredits({ credits }) {
     ].filter(cat => cat.data?.length > 0);
   }, [credits]);
 
-  // Set default category to the one with the most items if directing is empty
-  useMemo(() => {
-    if (categories.length > 0 && !categories.find(c => c.id === activeCategory)) {
-      setActiveCategory(categories[0].id);
-    }
-  }, [categories, activeCategory]);
+  const resolvedCategory = categories.find((category) => category.id === activeCategory)?.id || categories[0]?.id;
 
   const currentItems = useMemo(() => {
-    const data = credits?.[activeCategory] || [];
+    const data = credits?.[resolvedCategory] || [];
     if (mediaFilter === "all") return data;
     return data.filter(item => item.media_type === mediaFilter);
-  }, [credits, activeCategory, mediaFilter]);
+  }, [credits, resolvedCategory, mediaFilter]);
 
   if (!categories.length) return null;
 
@@ -74,11 +69,8 @@ export function PersonCredits({ credits }) {
       </div>
 
       <AnimatePresence mode="wait">
-        <motion.div 
-          key={`${activeCategory}-${mediaFilter}`}
-          initial={{ opacity: 0, y: 10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
+        <div 
+          key={`${resolvedCategory}-${mediaFilter}`}
           className="grid grid-cols-3 sm:grid-cols-4 lg:grid-cols-5 gap-4"
         >
           {currentItems.length > 0 ? (
@@ -88,7 +80,7 @@ export function PersonCredits({ credits }) {
           ) : (
             <EmptyState />
           )}
-        </motion.div>
+        </div>
       </AnimatePresence>
     </section>
   );
