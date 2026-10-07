@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useParams } from "react-router-dom";
 import { discoverMovies, discoverTv } from "../services/tmdb";
 import { Loader2 } from "lucide-react";
@@ -12,13 +12,7 @@ export default function Genre() {
   const [loadingMore, setLoadingMore] = useState(false);
   const [page, setPage] = useState(1);
 
-  useEffect(() => {
-    setItems([]);
-    setPage(1);
-    fetchData(1, true);
-  }, [type, id]);
-
-  const fetchData = async (pageNum, reset = false) => {
+  const fetchData = useCallback(async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
     else setLoading(true);
 
@@ -33,7 +27,13 @@ export default function Genre() {
       setLoading(false);
       setLoadingMore(false);
     }
-  };
+  }, [id, type]);
+
+  useEffect(() => {
+    setItems([]);
+    setPage(1);
+    fetchData(1, true);
+  }, [fetchData, id, type]);
 
   return (
     <div className="px-4 pb-16 pt-6 md:px-8">

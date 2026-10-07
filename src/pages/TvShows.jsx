@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { discoverTv, getTvGenres } from "../services/tmdb";
 import FilterBar from "../components/FilterBar";
 import { Loader2 } from "lucide-react";
@@ -18,26 +18,7 @@ export default function TvShows() {
   const [minRating, setMinRating] = useState("");
   const [selectedStatus, setSelectedStatus] = useState("");
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const genreData = await getTvGenres();
-        setGenres(genreData.genres || []);
-        await fetchShows(1, true);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (!loading) fetchShows(1, true);
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedStatus]);
-
-  const fetchShows = async (pageNum, reset = false) => {
+  const fetchShows = useCallback(async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
     try {
       const data = await discoverTv({
@@ -57,7 +38,26 @@ export default function TvShows() {
       setLoadingMore(false);
       setLoading(false);
     }
-  };
+  }, [minRating, selectedGenre, selectedLanguage, selectedStatus, selectedYear]);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const genreData = await getTvGenres();
+        setGenres(genreData.genres || []);
+        await fetchShows(1, true);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, [fetchShows]);
+
+  useEffect(() => {
+    if (!loading) fetchShows(1, true);
+  }, [fetchShows, loading, selectedGenre, selectedYear, selectedLanguage, minRating, selectedStatus]);
 
   return (
     <div className="px-4 pb-16 pt-6 md:px-8">

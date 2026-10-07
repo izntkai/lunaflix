@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { discoverMovies, getMovieGenres } from "../services/tmdb";
 import FilterBar from "../components/FilterBar";
 import { Loader2 } from "lucide-react";
@@ -18,26 +18,7 @@ export default function Movies() {
   const [minRating, setMinRating] = useState("");
   const [selectedRuntime, setSelectedRuntime] = useState("");
 
-  useEffect(() => {
-    const init = async () => {
-      try {
-        const genreData = await getMovieGenres();
-        setGenres(genreData.genres || []);
-        await fetchMovies(1, true);
-      } catch (err) {
-        console.error(err);
-      } finally {
-        setLoading(false);
-      }
-    };
-    init();
-  }, []);
-
-  useEffect(() => {
-    if (!loading) fetchMovies(1, true);
-  }, [selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime]);
-
-  const fetchMovies = async (pageNum, reset = false) => {
+  const fetchMovies = useCallback(async (pageNum, reset = false) => {
     if (pageNum > 1) setLoadingMore(true);
     try {
       const data = await discoverMovies({
@@ -55,7 +36,26 @@ export default function Movies() {
     } finally {
       setLoadingMore(false);
     }
-  };
+  }, [minRating, selectedGenre, selectedLanguage, selectedRuntime, selectedYear]);
+
+  useEffect(() => {
+    const init = async () => {
+      try {
+        const genreData = await getMovieGenres();
+        setGenres(genreData.genres || []);
+        await fetchMovies(1, true);
+      } catch (err) {
+        console.error(err);
+      } finally {
+        setLoading(false);
+      }
+    };
+    init();
+  }, [fetchMovies]);
+
+  useEffect(() => {
+    if (!loading) fetchMovies(1, true);
+  }, [fetchMovies, loading, selectedGenre, selectedYear, selectedLanguage, minRating, selectedRuntime]);
 
   return (
     <div className="px-4 pb-16 pt-6 md:px-8">

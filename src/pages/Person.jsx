@@ -1,8 +1,7 @@
-import { useParams, useNavigate, Link } from "react-router-dom";
+import { useParams, useNavigate } from "react-router-dom";
 import { useState, useEffect } from "react";
 import { getPersonDetails } from "../services/tmdb";
-import { ArrowLeft, Loader2, Film, MapPin, Calendar, Tv } from "lucide-react";
-import { AnimatePresence } from "framer-motion";
+import { ArrowLeft, Loader2, MapPin, Calendar } from "lucide-react";
 import { usePersonCredits } from "../hooks/usePersonCredits";
 import { PersonCredits } from "../components/PersonCredits";
 
@@ -20,13 +19,13 @@ export default function Person() {
     });
   }, [id]);
 
+  const credits = usePersonCredits(person);
+
   if (loading) return (
     <div className="min-h-screen bg-[#0f0f0f] flex items-center justify-center">
       <Loader2 className="animate-spin text-purple-500 w-8 h-8" />
     </div>
   );
-
-  const credits = usePersonCredits(person);
 
   return (
     <div>

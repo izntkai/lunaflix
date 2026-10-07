@@ -45,7 +45,7 @@ export default function MovieCard({ movie, type = "movie", progress, compact = f
   return (
     <article
       onClick={() => navigate(`/details/${mediaType}/${movie.id}`)}
-      className={`group relative flex-none ${compact ? "w-34 md:w-40" : "w-40 md:w-48 lg:w-52"} aspect-[2/3] cursor-pointer overflow-hidden rounded-2xl border border-[#2A2A2F] bg-[#18181C] transition-all duration-300 hover:-translate-y-1 hover:border-[#A78BFA]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.45)]`}
+      className={`group relative flex-none ${compact ? "w-[8.5rem] md:w-40" : "w-40 md:w-48 lg:w-52"} aspect-[2/3] cursor-pointer overflow-hidden rounded-2xl border border-[#2A2A2F] bg-[#18181C] transition-all duration-300 hover:-translate-y-1 hover:border-[#A78BFA]/60 hover:shadow-[0_20px_40px_rgba(0,0,0,0.45)]`}
     >
       <img src={posterUrl} alt={title} className="h-full w-full object-cover transition duration-500 group-hover:scale-105" loading="lazy" />
 

@@ -21,7 +21,6 @@ export function useWatch() {
 
   useEffect(() => {
     window.scrollTo(0, 0);
-    setIframeLoading(true);
     const fetchFunc = isTv ? getTvInfo : getMovieInfo;
     fetchFunc(id)
       .then((data) => setMovie(data))
@@ -70,12 +69,27 @@ export function useWatch() {
   const currentSeasonData = movie?.seasons?.find((s) => s.season_number === Number(season));
   const totalEpisodesInSeason = currentSeasonData?.episode_count || 0;
 
+  const selectServer = (server) => {
+    setIframeLoading(true);
+    setCurrentServer(server);
+  };
+
+  const selectSeason = (nextSeason) => {
+    setIframeLoading(true);
+    setSeason(nextSeason);
+  };
+
+  const selectEpisode = (nextEpisode) => {
+    setIframeLoading(true);
+    setEpisode(nextEpisode);
+  };
+
   const handleNextEpisode = () => {
     if (Number(episode) < totalEpisodesInSeason) {
-      setEpisode((prev) => Number(prev) + 1);
+      selectEpisode(Number(episode) + 1);
     } else if (Number(season) < movie.number_of_seasons) {
-      setSeason((prev) => Number(prev) + 1);
-      setEpisode(1);
+      selectSeason(Number(season) + 1);
+      selectEpisode(1);
     }
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
@@ -85,16 +99,16 @@ export function useWatch() {
     isTv,
     mediaType,
     currentServer,
-    setCurrentServer,
+    setCurrentServer: selectServer,
     movie,
     loading,
     iframeLoading,
     setIframeLoading,
     canInteract,
     season,
-    setSeason,
+    setSeason: selectSeason,
     episode,
-    setEpisode,
+    setEpisode: selectEpisode,
     episodeDetails,
     totalEpisodesInSeason,
     handleNextEpisode,

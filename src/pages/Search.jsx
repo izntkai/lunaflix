@@ -15,7 +15,6 @@ export default function Search() {
   const [mediaFilter, setMediaFilter] = useState("all");
 
   useEffect(() => {
-    setSearchTerm(query || "");
     const timer = setTimeout(() => {
       if (!query) {
         setResults([]);
